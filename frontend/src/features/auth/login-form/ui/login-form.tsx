@@ -5,7 +5,6 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 export function LoginForm() {
@@ -32,7 +31,7 @@ export function LoginForm() {
                 <Label htmlFor="password">Password</Label>
                 <Input id="password" type="password" placeholder="********" required />
             </div>
-            <Button type="submit" className="w-full mt-4" disabled={isLoading}>
+            <Button className="w-full mt-4" disabled={isLoading}>
                 {isLoading ? "Logging in..." : "Login"}
             </Button>
         </form>

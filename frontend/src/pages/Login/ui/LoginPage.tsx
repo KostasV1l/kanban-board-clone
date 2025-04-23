@@ -1,3 +1,4 @@
+import { ModeToggle } from "@/components/dark-mode/mode-toggle";
 import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -7,13 +8,13 @@ import { RegisterForm } from "@features/auth/login-form/ui/register-form";
 
 export const LoginPage = () => {
     return (
-        <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
-            <div className="w-full max-w-md space-y-8">
+        <div className="flex min-h-screen items-center justify-center p-4">
+            <div className="w-full max-w-md space-y-8 bg-card rounded-lg p-8 shadow-md">
                 <div className="flex justify-center">
                     <Logo />
                 </div>
-                <div className="rounded-lg bg-white p-6 shadow-md">
-                    <Tabs defaultValue="login" className="w-full">
+                <div>
+                    <Tabs defaultValue="login" className="w-full font-primary">
                         <TabsList className="grid w-full grid-cols-2 mb-6">
                             <TabsTrigger value="login">Login</TabsTrigger>
                             <TabsTrigger value="register">Register</TabsTrigger>
@@ -33,6 +34,9 @@ export const LoginPage = () => {
                         </Button>
                     </div>
                 </div>
+            </div>
+            <div className="absolute bottom-4 right-4">
+                <ModeToggle />
             </div>
         </div>
     );
