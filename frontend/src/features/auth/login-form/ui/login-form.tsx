@@ -31,7 +31,7 @@ export function LoginForm() {
                 <Label htmlFor="password">Password</Label>
                 <Input id="password" type="password" placeholder="********" required />
             </div>
-            <Button className="w-full mt-4" disabled={isLoading}>
+            <Button className="w-full mt-4 cursor-pointer" disabled={isLoading}>
                 {isLoading ? "Logging in..." : "Login"}
             </Button>
         </form>

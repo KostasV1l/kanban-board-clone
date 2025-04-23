@@ -119,4 +119,10 @@
     body {
         @apply bg-background text-foreground;
     }
+
+    input:-webkit-autofill,
+    textarea:-webkit-autofill,
+    select:-webkit-autofill {
+        transition: background-color 50000s ease-in-out 0s !important;
+    }
 }

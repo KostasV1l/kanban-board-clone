@@ -6,8 +6,8 @@ import "@fontsource-variable/open-sans";
 import "@app/styles/global.css";
 
 export const metadata: Metadata = {
-    title: "Kanban Board Clone",
-    description: "A simple kanban board clone.",
+    title: "TASKFLOW | Kanban Board",
+    description: "A simple kanban board application.",
 };
 
 export default function RootLayout({

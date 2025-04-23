@@ -16,8 +16,12 @@ export const LoginPage = () => {
                 <div>
                     <Tabs defaultValue="login" className="w-full font-primary">
                         <TabsList className="grid w-full grid-cols-2 mb-6">
-                            <TabsTrigger value="login">Login</TabsTrigger>
-                            <TabsTrigger value="register">Register</TabsTrigger>
+                            <TabsTrigger className="cursor-pointer" value="login">
+                                Login
+                            </TabsTrigger>
+                            <TabsTrigger className="cursor-pointer" value="register">
+                                Register
+                            </TabsTrigger>
                         </TabsList>
                         <TabsContent value="login">
                             <LoginForm />
