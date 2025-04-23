@@ -21,6 +21,41 @@ export const loginUser = async (data: LoginFormData): Promise<Response> => {
     }
 };
 
+//=========================
+// User registration request
+//=========================
+export const registerUser = async (data: { username: string; email: string; password: string }): Promise<Response> => {
+    try {
+        // TODO: Check actual API endpoint
+        const res = await fetch("/api/register", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+        });
+
+        if (!res.ok) {
+            const errorData = await res.json();
+            throw new Error(errorData.message || "Registration failed");
+        }
+
+        // Auto-login after successful registration
+        if (res.ok) {
+            // Store the token
+            const data = await res.json();
+            if (data.token) {
+                setAuthToken(data.token);
+            }
+        }
+
+        return res;
+    } catch (error) {
+        console.error("Registration request failed:", error);
+        throw error;
+    }
+};
+
 // ? Should we keep JWT token in local storage, use cookies or use SessionStorage?
 // LocalStorage
 //=========================

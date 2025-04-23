@@ -6,7 +6,7 @@ import "@fontsource-variable/open-sans";
 import "@app/styles/global.css";
 
 export const metadata: Metadata = {
-    title: "TASKFLOW | Kanban Board",
+    title: "Login | TASKFLOW",
     description: "A simple kanban board application.",
 };
 
@@ -19,7 +19,7 @@ export default function RootLayout({
         <>
             <html lang="en" suppressHydrationWarning>
                 <head />
-                <body className="font-sans h-dvh px-4 flex flex-col mx-auto selection:bg-primary-accent selection:text-white">
+                <body className="font-sans h-dvh flex flex-col mx-auto selection:bg-blue-950 selection:text-white">
                     <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
                         {children}
                     </ThemeProvider>

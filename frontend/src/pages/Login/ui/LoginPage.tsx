@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
 import { LoginForm } from "@features/auth/login-form/ui/login-form";
-import { RegisterForm } from "@features/auth/login-form/ui/register-form";
+import { RegisterForm } from "@features/auth/register-form/ui/register-form";
 
 export const LoginPage = () => {
     return (
