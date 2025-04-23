@@ -18,9 +18,21 @@
 		"test:watch": "jest --watch"
 	},
 	"dependencies": {
+		"@fontsource-variable/open-sans": "^5.2.5",
+		"@fontsource/lato": "^5.2.5",
+		"@hookform/resolvers": "^5.0.1",
+		"@radix-ui/react-slot": "^1.2.0",
+		"@tailwindcss/postcss": "^4.1.4",
+		"class-variance-authority": "^0.7.1",
+		"clsx": "^2.1.1",
+		"lucide-react": "^0.503.0",
 		"next": "14.2.3",
+		"postcss": "^8.5.3",
 		"react": "^18",
-		"react-dom": "^18"
+		"react-dom": "^18",
+		"tailwind-merge": "^3.2.0",
+		"tailwindcss": "^4.1.4",
+		"zod": "^3.24.3"
 	},
 	"devDependencies": {
 		"@ianvs/prettier-plugin-sort-imports": "^4.2.1",
@@ -41,6 +53,7 @@
 		"jest-environment-jsdom": "^29.7.0",
 		"prettier": "^3.2.5",
 		"ts-node": "^10.9.2",
+		"tw-animate-css": "^1.2.8",
 		"typescript": "^5",
 		"typescript-eslint": "^7.10.0"
 	}
