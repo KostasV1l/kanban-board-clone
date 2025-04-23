@@ -1,9 +1,39 @@
-import { LoginForm } from "@features/auth/login-form/ui/login-form"
+import { Logo } from "@/components/logo";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import Link from "next/link";
+import { LoginForm } from "@features/auth/login-form/ui/login-form";
+import { RegisterForm } from "@features/auth/login-form/ui/register-form";
 
 export const LoginPage = () => {
     return (
-        <main className="flex items-center justify-center h-screen">
-            <LoginForm />
-        </main>
-    )
-}
+        <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
+            <div className="w-full max-w-md space-y-8">
+                <div className="flex justify-center">
+                    <Logo />
+                </div>
+                <div className="rounded-lg bg-white p-6 shadow-md">
+                    <Tabs defaultValue="login" className="w-full">
+                        <TabsList className="grid w-full grid-cols-2 mb-6">
+                            <TabsTrigger value="login">Login</TabsTrigger>
+                            <TabsTrigger value="register">Register</TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="login">
+                            <LoginForm />
+                        </TabsContent>
+                        <TabsContent value="register">
+                            <RegisterForm />
+                        </TabsContent>
+                    </Tabs>
+
+                    <div className="mt-5 pt-4 border-t text-center">
+                        <p className="text-sm text-muted-foreground mb-4">Want to try it out first?</p>
+                        <Button variant="outline" className="w-full" asChild>
+                            <Link href="/dashboard">Continue as Guest</Link>
+                        </Button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
