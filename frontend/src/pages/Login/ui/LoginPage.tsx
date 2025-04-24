@@ -1,6 +1,6 @@
 import { ModeToggle } from "@/components/dark-mode/mode-toggle";
-import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/ui/logo";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
 import { LoginForm } from "@features/auth/login-form/ui/login-form";
@@ -9,7 +9,7 @@ import { RegisterForm } from "@features/auth/register-form/ui/register-form";
 export const LoginPage = () => {
     return (
         <div className="flex min-h-screen items-center justify-center p-4">
-            <div className="w-full max-w-md space-y-8 bg-card rounded-lg p-8 shadow-md">
+            <section className="w-full max-w-md space-y-8 bg-card rounded-lg p-8 drop-shadow-lg">
                 <div className="flex justify-center">
                     <Logo />
                 </div>
@@ -38,7 +38,7 @@ export const LoginPage = () => {
                         </Button>
                     </div>
                 </div>
-            </div>
+            </section>
             <div className="absolute bottom-4 right-4">
                 <ModeToggle />
             </div>
