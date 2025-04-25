@@ -18,6 +18,7 @@ export const DashboardPage = () => {
     const { data: boards, isLoading, error } = useBoards();
     const createBoard = useCreateBoard();
     const deleteBoard = useDeleteBoard();
+    const boardCount = boards ? boards.length : 0;
 
     // Function to handle adding a new board
     const handleAddBoard = async (boardData: { name: string; description: string; color: string }) => {
@@ -32,7 +33,7 @@ export const DashboardPage = () => {
 
     return (
         <>
-            <Greeting />
+            <Greeting boardCount={boardCount} />
             <BoardHeader />
             {isLoading ? (
                 // Show skeleton UI while loading

@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { registerUser } from "@/shared/api/auth";
+import { AuthAPI } from "@/entities/auth/model/api";
+import { RegisterFormData as EntityRegisterData } from "@/entities/auth/model/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
 
+// Extended schema for the form with password confirmation
 export const registerSchema = z
     .object({
         email: z.string().min(1, "Email is required").email("Please enter a valid email"),
@@ -16,6 +18,7 @@ export const registerSchema = z
         path: ["passwordConfirmation"],
     });
 
+// Local form type with password confirmation
 export type RegisterFormData = z.infer<typeof registerSchema>;
 
 export const useRegisterForm = () => {
@@ -35,19 +38,23 @@ export const useRegisterForm = () => {
     const handleRegister = async (data: RegisterFormData) => {
         try {
             setServerError(null);
-            // We exclude passwordConfirmation as it's only needed for validation
-            const { passwordConfirmation, ...registrationData } = data;
-            const response = await registerUser({
-                username: data.email.split("@")[0], // Simple username generation
+
+            // Extract fields needed for the API to register the user
+            const entityData: EntityRegisterData = {
                 email: data.email,
                 password: data.password,
-            });
+            };
 
-            if (response.ok) {
+            try {
+                // Use the entity API function (instead of direct fetch)
+                await AuthAPI.register(entityData);
                 router.push("/dashboard");
-            } else {
-                const errorData = await response.json().catch(() => ({}));
-                setServerError(errorData.message || "Registration failed");
+            } catch (error) {
+                if (error instanceof Error) {
+                    setServerError(error.message);
+                } else {
+                    setServerError("An unexpected error occurred");
+                }
             }
         } catch (error) {
             if (error instanceof Error) {
