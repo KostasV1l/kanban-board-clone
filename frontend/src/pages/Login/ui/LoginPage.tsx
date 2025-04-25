@@ -8,7 +8,7 @@ import { RegisterForm } from "@features/auth/register-form/ui/register-form";
 
 export const LoginPage = () => {
     return (
-        <div className="flex min-h-screen items-center justify-center p-4">
+        <div className="flex-1 flex items-center justify-center p-4 relative">
             <section className="w-full max-w-md space-y-8 bg-card rounded-lg p-8 drop-shadow-lg">
                 <div className="flex justify-center">
                     <Logo />
