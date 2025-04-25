@@ -22,6 +22,17 @@ export function RegisterForm() {
                 </div>
             )}
             <div className="space-y-2">
+                <Label htmlFor="register-username">Username</Label>
+                <Input
+                    id="register-username"
+                    type="text"
+                    placeholder="username"
+                    {...register("username")}
+                    aria-invalid={errors.username ? "true" : "false"}
+                />
+                {errors.username && <p className="text-red-500 text-xs mt-1">{errors.username.message}</p>}
+            </div>
+            <div className="space-y-2">
                 <Label htmlFor="register-email">Email</Label>
                 <Input
                     id="register-email"
