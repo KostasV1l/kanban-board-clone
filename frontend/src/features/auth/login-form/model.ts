@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { loginUser } from "@/shared/api/auth";
+import { useLogin } from "@/shared/api/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
@@ -15,6 +15,7 @@ export type LoginFormData = z.infer<typeof loginSchema>;
 export const useLoginForm = () => {
     const router = useRouter();
     const [serverError, setServerError] = useState<string | null>(null);
+    const loginMutation = useLogin();
 
     const form = useForm<LoginFormData>({
         resolver: zodResolver(loginSchema),
@@ -28,14 +29,14 @@ export const useLoginForm = () => {
     const handleLogin = async (data: LoginFormData) => {
         try {
             setServerError(null);
-            const response = await loginUser(data);
-            if (response.ok) {
-                router.push("/dashboard");
-            } else {
-                setServerError("Invalid credentials");
-            }
+            await loginMutation.mutateAsync(data);
+            router.push("/dashboard");
         } catch (error) {
-            setServerError("An unexpected error occurred");
+            if (error instanceof Error) {
+                setServerError(error.message || "Invalid credentials");
+            } else {
+                setServerError("An unexpected error occurred");
+            }
         }
     };
 
@@ -43,5 +44,6 @@ export const useLoginForm = () => {
         form,
         handleLogin,
         serverError,
+        isLoading: loginMutation.isPending,
     };
 };

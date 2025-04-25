@@ -2,9 +2,11 @@ import Header from "@/components/ui/header";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
     return (
-        <main className="w-full h-screen">
+        <div className="w-full flex-grow flex flex-col">
             <Header />
-            <div className="flex-1 overflow-auto">{children}</div>
-        </main>
+            <main className="w-11/12 my-4 mx-auto flex-grow">
+                {children}
+            </main>
+        </div>
     );
 }
