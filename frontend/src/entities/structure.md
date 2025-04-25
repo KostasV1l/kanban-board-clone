@@ -54,6 +54,15 @@ The `/model` directory is the heart of each entity, containing all the logic and
 
 ## Entity API Reference
 
+The data flow within each entity is designed to be clear and consistent.
+The flow of data typically follows this pattern:
+
+> User → UI element → element Model → Shared API → Entity Queries → Entity API → Backend Server
+
+For example, in the case of authentication, the flow would be:
+
+> User → Form UI → Form Model → Shared API → Entity Queries → Entity API → Backend Server
+
 Below is a comprehensive reference of all entities, their types, API methods, and hooks for quick access.
 
 ### Auth Entity
