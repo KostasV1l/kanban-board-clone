@@ -9,6 +9,7 @@ import { z } from "zod";
 // Extended schema for the form with password confirmation
 export const registerSchema = z
     .object({
+        username: z.string().min(1, "Username is required"),
         email: z.string().min(1, "Email is required").email("Please enter a valid email"),
         password: z.string().min(1, "Password is required").min(8, "Password must be at least 8 characters"),
         passwordConfirmation: z.string().min(1, "Please confirm your password"),
@@ -29,6 +30,7 @@ export const useRegisterForm = () => {
         resolver: zodResolver(registerSchema),
         mode: "onChange",
         defaultValues: {
+            username: "",
             email: "",
             password: "",
             passwordConfirmation: "",
@@ -41,6 +43,7 @@ export const useRegisterForm = () => {
 
             // Extract fields needed for the API to register the user
             const entityData: EntityRegisterData = {
+                username: data.username,
                 email: data.email,
                 password: data.password,
             };
