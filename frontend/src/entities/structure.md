@@ -135,6 +135,44 @@ Below is a comprehensive reference of all entities, their types, API methods, an
 | `useBoardsList` | Hook to manage boards with local state | -            | `{ boards, loading, error, addBoard, updateBoard, deleteBoard }` |
 | `useBoardState` | Hook to get a specific board           | `id: number` | `{ board, loading, error }`                                      |
 
+### List Entity
+
+#### Types
+
+| Type            | Description                                  | Properties                                                                                  |
+| --------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `List`          | Represents a list/column in a board          | `id: number`, `name: string`, `boardId: number`, `position: number`, `color?: string`, etc. |
+| `CreateListDto` | Data structure for creating a new list       | `name: string`, `boardId: number`, `position?: number`, `color?: string`                    |
+| `UpdateListDto` | Data structure for updating an existing list | `name?: string`, `position?: number`, `color?: string`                                      |
+
+#### API Methods
+
+| Method         | Signature                                                 | Description                   | Returns           |
+| -------------- | --------------------------------------------------------- | ----------------------------- | ----------------- |
+| `getLists`     | `(boardId: number) => Promise<List[]>`                    | Gets all lists for a board    | `Promise<List[]>` |
+| `getList`      | `(id: number) => Promise<List>`                           | Gets a specific list          | `Promise<List>`   |
+| `createList`   | `(data: CreateListDto) => Promise<List>`                  | Creates a new list            | `Promise<List>`   |
+| `updateList`   | `(id: number, data: UpdateListDto) => Promise<List>`      | Updates an existing list      | `Promise<List>`   |
+| `deleteList`   | `(id: number) => Promise<void>`                           | Deletes a list                | `Promise<void>`   |
+| `reorderLists` | `(boardId: number, listIds: number[]) => Promise<List[]>` | Reorders lists within a board | `Promise<List[]>` |
+
+#### Tanstack Query Hooks
+
+| Hook              | Purpose                             | Parameters        | Returns             |
+| ----------------- | ----------------------------------- | ----------------- | ------------------- |
+| `useGetLists`     | Query hook to get lists for a board | `boardId: number` | `UseQueryResult`    |
+| `useGetList`      | Query hook to get a specific list   | `id: number`      | `UseQueryResult`    |
+| `useCreateList`   | Mutation hook to create a list      | -                 | `UseMutationResult` |
+| `useUpdateList`   | Mutation hook to update a list      | -                 | `UseMutationResult` |
+| `useDeleteList`   | Mutation hook to delete a list      | -                 | `UseMutationResult` |
+| `useReorderLists` | Mutation hook to reorder lists      | -                 | `UseMutationResult` |
+
+#### Traditional React Hooks
+
+| Hook                | Purpose                                      | Parameters             | Returns                                                                            |
+| ------------------- | -------------------------------------------- | ---------------------- | ---------------------------------------------------------------------------------- |
+| `useListReordering` | Hook to manage list reordering via drag/drop | `initialLists: List[]` | `{ lists, isDragging, startDrag, endDrag, reorderList, addList, updateList, ... }` |
+
 ### Task Entity
 
 #### Types
@@ -334,6 +372,157 @@ const BoardManagerComponent = () => {
                 ))}
             </ul>
         </div>
+    );
+};
+```
+
+### List Entity Examples
+
+#### Using Tanstack Query Hooks
+
+```tsx
+import { useCreateList, useGetLists, useReorderLists } from "@/shared/api/list";
+
+const BoardLists = ({ boardId }) => {
+    // Fetch all lists for a board
+    const { data: lists, isLoading, error } = useGetLists(boardId);
+    const createListMutation = useCreateList();
+    const reorderListsMutation = useReorderLists();
+
+    if (isLoading) return <div>Loading lists...</div>;
+    if (error) return <div>Error loading lists: {error.message}</div>;
+
+    const handleCreateList = () => {
+        createListMutation.mutate({
+            name: "New List",
+            boardId: boardId,
+            position: lists?.length || 0,
+        });
+    };
+
+    const handleReorder = (sourceIndex, destinationIndex) => {
+        // Create a new array representing the reordered lists
+        const reorderedLists = [...lists];
+        const [removed] = reorderedLists.splice(sourceIndex, 1);
+        reorderedLists.splice(destinationIndex, 0, removed);
+
+        // Get the IDs in the new order
+        const listIds = reorderedLists.map(list => list.id);
+
+        // Call the reorder mutation
+        reorderListsMutation.mutate({
+            boardId,
+            listIds,
+        });
+    };
+
+    return (
+        <div className="board-lists">
+            <h2>Lists</h2>
+            <button onClick={handleCreateList}>Add New List</button>
+
+            <div className="lists-container">
+                {lists?.map((list, index) => (
+                    <div
+                        key={list.id}
+                        className="list-column"
+                        style={{ borderTop: `3px solid ${list.color || "#ccc"}` }}
+                    >
+                        <h3>{list.name}</h3>
+                        <div className="tasks-container">{/* Tasks would be rendered here */}</div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
+```
+
+#### Using Traditional React Hooks
+
+```tsx
+import { useEffect } from "react";
+import { listApi, useListReordering } from "@/shared/api/list";
+
+const DraggableLists = ({ boardId }) => {
+    const [listsData, setListsData] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    // Fetch the lists
+    useEffect(() => {
+        const fetchLists = async () => {
+            try {
+                setLoading(true);
+                const data = await listApi.getLists(boardId);
+                setListsData(data);
+                setError(null);
+            } catch (err) {
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchLists();
+    }, [boardId]);
+
+    // Use the list reordering hook
+    const { lists, isDragging, startDrag, endDrag, reorderList, addList, updateList, removeList } =
+        useListReordering(listsData);
+
+    // Update when source data changes
+    useEffect(() => {
+        if (listsData.length > 0) {
+            setLists(listsData);
+        }
+    }, [listsData]);
+
+    const handleDragEnd = async result => {
+        if (!result.destination) return;
+
+        // Reorder locally
+        const newOrder = reorderList(result.source.index, result.destination.index);
+
+        // Save to server
+        try {
+            await listApi.reorderLists(boardId, newOrder);
+        } catch (err) {
+            console.error("Failed to reorder lists:", err);
+            // Optionally restore original order
+        }
+
+        endDrag();
+    };
+
+    if (loading) return <div>Loading lists...</div>;
+    if (error) return <div>Error: {error}</div>;
+
+    return (
+        <DragDropContext onDragStart={startDrag} onDragEnd={handleDragEnd}>
+            <Droppable droppableId="lists" direction="horizontal" type="LIST">
+                {provided => (
+                    <div className="lists-container" {...provided.droppableProps} ref={provided.innerRef}>
+                        {lists.map((list, index) => (
+                            <Draggable key={list.id} draggableId={`list-${list.id}`} index={index}>
+                                {provided => (
+                                    <div
+                                        className="list-column"
+                                        ref={provided.innerRef}
+                                        {...provided.draggableProps}
+                                        {...provided.dragHandleProps}
+                                    >
+                                        <h3>{list.name}</h3>
+                                        {/* Tasks would be rendered here */}
+                                    </div>
+                                )}
+                            </Draggable>
+                        ))}
+                        {provided.placeholder}
+                    </div>
+                )}
+            </Droppable>
+        </DragDropContext>
     );
 };
 ```

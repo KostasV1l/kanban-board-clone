@@ -43,7 +43,7 @@ export const BoardCard = ({ id, name, description, color, tasksCount = 0, onDele
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-6 w-6 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                                className="h-6 w-6 text-muted-foreground cursor-pointer hover:text-destructive hover:bg-destructive/10"
                                 disabled={deleteBoardMutation.isPending}
                             >
                                 <Trash2 className="size-4" />
