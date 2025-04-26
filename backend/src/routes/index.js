@@ -1,4 +1,4 @@
-// MOUNT ROUTES FILES HERE
+// MOUNT ROUTES HERE
 const express = require('express');
 const router = express.Router();
 const authRoutes = require('./auth.routes');
