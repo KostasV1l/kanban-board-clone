@@ -1,5 +1,5 @@
 import { FolderKanban } from "lucide-react";
-import { CreateBoard } from "./create-board";
+import { CreateBoard } from "../../features/dashboard/create-board";
 
 export const BoardHeader = () => {
     return (

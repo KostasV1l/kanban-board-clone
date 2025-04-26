@@ -1,30 +1,30 @@
-const jwt = require("jsonwebtoken");
 const User = require("../models/user.model");
+const { verifyAccessToken } = require("../utils/jwt.utils");
 
 exports.protect = async (req, res, next) => {
   try {
-    let token;
+    const accessToken = req.cookies.accessToken;
+    const crsfToken = req.cookies["x-crsf-token"];
+
+    if (!accessToken) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
 
     if (
-      req.headers.authorization &&
-      req.headers.authorization.startsWith("Bearer")
+      !req.path.includes("/refresh") &&
+      req.cookies["csrf-token"] !== crsfToken
     ) {
-      token = req.headers.authorization.split(" ")[1];
+      return res.status(403).json({ message: "Invalid CSRF token" });
     }
 
-    if (!token) {
-      return res
-        .status(401)
-        .json({ message: "Not authorized to access this route" });
-    }
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = verifyAccessToken(accessToken);
 
     req.user = await User.findById(decoded.id);
+    if (!req.user) {
+      return res.status(401).json({ message: "User not found" });
+    }
     next();
-  } catch (error) {
-    return res
-      .status(401)
-      .json({ message: "Not authorized to access this route" });
+  } catch (err) {
+    return res.status(401).json({ message: "Not authenticated" });
   }
 };
