@@ -23,14 +23,14 @@ const setTokenCookies = (res, accessToken, refreshToken) => {
     maxAge: 15 * 60 * 1000, // 15 minutes
   });
 
-  const crsfToken = crypto.randomBytes(32).toString("hex");
-  res.cookie("crsfToken", crsfToken, {
+  const csrfToken = crypto.randomBytes(32).toString("hex");
+  res.cookie("csrfToken", csrfToken, {
     secure: process.env.NODE_ENV !== "development",
     sameSite: "strict",
     maxAge: 15 * 60 * 1000,
   });
 
-  return crsfToken;
+  return csrfToken;
 };
 
 const saveRefreshToken = async (token, userId) => {
@@ -56,9 +56,9 @@ exports.register = async ({ email, password, username }, res) => {
 
   await saveRefreshToken(refreshToken, user._id);
 
-  const crsfToken = setTokenCookies(res, accessToken, refreshToken);
+  const csrfToken = setTokenCookies(res, accessToken, refreshToken);
 
-  return { user, crsfToken };
+  return { user, csrfToken };
 };
 
 exports.login = async ({ email, password }, res) => {
@@ -72,9 +72,9 @@ exports.login = async ({ email, password }, res) => {
 
   await saveRefreshToken(refreshToken, user._id);
 
-  const crsfToken = setTokenCookies(res, accessToken, refreshToken);
+  const csrfToken = setTokenCookies(res, accessToken, refreshToken);
 
-  return { user, crsfToken };
+  return { user, csrfToken };
 };
 
 exports.refresh = async (refreshTokenCookie, res) => {
@@ -92,9 +92,9 @@ exports.refresh = async (refreshTokenCookie, res) => {
 
   await saveRefreshToken(newRefreshToken, decoded.id);
 
-  const crsfToken = setTokenCookies(res, newAccessToken, newRefreshToken);
+  const csrfToken = setTokenCookies(res, newAccessToken, newRefreshToken);
 
-  return { crsfToken };
+  return { csrfToken };
 };
 
 exports.logout = async (refreshTokenCookie) => {
