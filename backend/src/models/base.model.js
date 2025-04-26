@@ -1,8 +1,26 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 // Base schema options that might be common to multiple models
 const baseOptions = {
-  timestamps: true, // Adds createdAt and updatedAt timestamps
+    timestamps: true, // Adds createdAt and updatedAt timestamps
+    toJSON: {
+        virtuals: true,
+        versionKey: false,
+        transform(doc, ret) {
+            ret.id = ret._id.toString();
+            // delete ret._id;
+            // delete ret.__v;
+        },
+    },
+    toObject: {
+        virtuals: true,
+        versionKey: false,
+        transform(doc, ret) {
+            ret.id = ret._id.toString();
+            // delete ret._id;
+            // delete ret.__v;
+        },
+    },
 };
 
 // Example of how to create a schema:
@@ -25,5 +43,5 @@ module.exports = Example;
 */
 
 module.exports = {
-  baseOptions,
-}; 
+    baseOptions,
+};

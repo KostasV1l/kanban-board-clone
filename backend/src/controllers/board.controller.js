@@ -1,7 +1,7 @@
 const boardService = require("../services/board.service");
 
 // @desc    Get all boards for authenticated user
-// @route   GET /api/boards
+// @route   GET /api/boards?userId=123
 exports.getBoards = async (req, res, next) => {
     try {
         let boards;
@@ -20,7 +20,7 @@ exports.getBoards = async (req, res, next) => {
 
         res.status(200).json(boards);
     } catch (error) {
-        res.status(404).json({ message: "No boards found" });
+        next(error);
     }
 };
 

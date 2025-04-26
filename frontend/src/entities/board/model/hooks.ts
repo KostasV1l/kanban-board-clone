@@ -3,18 +3,26 @@
 import { useEffect, useState } from "react";
 import { BoardAPI } from "./api";
 import { Board } from "./types";
+import { useCurrentUser } from "@features/auth/hooks";
 
 // Hook to fetch all boards with loading and error states
 export const useBoardsList = () => {
     const [boards, setBoards] = useState<Board[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+    const { data: currentUser } = useCurrentUser();
+    const userId = currentUser?.id || "";
 
     useEffect(() => {
         const fetchBoards = async () => {
+            if (!userId) {
+                setLoading(false);
+                return;
+            }
+            
             try {
                 setLoading(true);
-                const data = await BoardAPI.getBoards();
+                const data = await BoardAPI.getBoards(userId);
                 setBoards(data);
                 setError(null);
             } catch (err) {
@@ -26,13 +34,18 @@ export const useBoardsList = () => {
         };
 
         fetchBoards();
-    }, []);
+    }, [userId]);
 
     // Function to add a new board
     const addBoard = async (board: Omit<Board, "id">) => {
+        if (!userId) {
+            setError("User not authenticated");
+            throw new Error("User not authenticated");
+        }
+        
         try {
             setLoading(true);
-            const newBoard = await BoardAPI.createBoard(board);
+            const newBoard = await BoardAPI.createBoard(board, userId);
             setBoards(prev => [...prev, newBoard]);
             return newBoard;
         } catch (err) {
@@ -61,7 +74,7 @@ export const useBoardsList = () => {
     };
 
     // Function to delete a board
-    const deleteBoard = async (id: number) => {
+    const deleteBoard = async (id: string) => {
         try {
             setLoading(true);
             await BoardAPI.deleteBoard(id);
@@ -87,13 +100,18 @@ export const useBoardsList = () => {
 };
 
 // Hook to fetch a single board by ID
-export const useBoardState = (id: number) => {
+export const useBoardState = (id: string) => {
     const [board, setBoard] = useState<Board | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchBoard = async () => {
+            if (!id) {
+                setLoading(false);
+                return;
+            }
+            
             try {
                 setLoading(true);
                 const data = await BoardAPI.getBoard(id);

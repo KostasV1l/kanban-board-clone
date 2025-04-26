@@ -16,20 +16,7 @@ export const metadata: Metadata = {
 export const DashboardPage = () => {
     // Using TanStack Query hooks instead of custom hooks
     const { data: boards, isLoading, error } = useBoards();
-    const createBoard = useCreateBoard();
-    const deleteBoard = useDeleteBoard();
     const boardCount = boards ? boards.length : 0;
-
-    // Function to handle adding a new board
-    const handleAddBoard = async (boardData: { name: string; description: string; color: string }) => {
-        try {
-            await createBoard.mutateAsync(boardData);
-            // Add any success notification here if needed
-        } catch (err) {
-            // Handle error (could add toast notification)
-            console.error("Failed to add board:", err);
-        }
-    };
 
     return (
         <>

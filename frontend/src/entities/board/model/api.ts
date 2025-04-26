@@ -1,92 +1,63 @@
+import axiosInstance from "@shared/api/axios-instance";
 import { Board } from "./types";
 
-// Mock data that will be replaced with real API calls later
-const MOCK_BOARDS: Board[] = [
-    {
-        id: 1,
-        name: "Personal",
-        description: "Personal board",
-        color: "bg-blue-500",
-    },
-    {
-        id: 2,
-        name: "Work",
-        description: "Work board",
-        color: "bg-green-500",
-    },
-    {
-        id: 3,
-        name: "School",
-        description: "School board",
-        color: "bg-red-500",
-    },
-    {
-        id: 4,
-        name: "Hobby",
-        description: "Hobby board",
-        color: "bg-yellow-500",
-    },
-    {
-        id: 5,
-        name: "Fitness",
-        description: "Fitness board",
-        color: "bg-purple-500",
-    },
-];
-
-// API client for board-related operations
 export const BoardAPI = {
     // Get all boards
-    getBoards: async (): Promise<Board[]> => {
-        // Simulate API delay
-        return new Promise(resolve => {
-            setTimeout(() => {
-                resolve(MOCK_BOARDS);
-            }, 1500);
-        });
+    getBoards: async (userId: string): Promise<Board[]> => {
+        try {
+            const { data } = await axiosInstance.get<Board[]>("/boards", {
+                params: { userId },
+            });
+            return data;
+        } catch (error: any) {
+            console.error("Failed to fetch boards:", error.response?.data?.message || error.message);
+            throw error;
+        }
     },
 
     // Get a single board by ID
-    getBoard: async (id: number): Promise<Board | undefined> => {
-        return new Promise(resolve => {
-            setTimeout(() => {
-                const board = MOCK_BOARDS.find(board => board.id === id);
-                resolve(board);
-            }, 1300);
-        });
+    getBoard: async (boardId: string): Promise<Board> => {
+        try {
+            const { data } = await axiosInstance.get<Board>(`/boards/${boardId}`);
+            return data;
+        } catch (error: any) {
+            console.error("Failed to fetch board create board:", error.response?.data?.message || error.message);
+            throw error;
+        }
     },
 
-    // Create a new board
-    createBoard: async (board: Omit<Board, "id">): Promise<Board> => {
-        return new Promise(resolve => {
-            setTimeout(() => {
-                const newBoard = {
-                    ...board,
-                    id: Math.max(...MOCK_BOARDS.map(b => b.id)) + 1,
-                };
-                // In a real implementation, we would update the server
-                resolve(newBoard);
-            }, 300);
-        });
+    // Create a new board — expect userId passed explicitly
+    createBoard: async (board: Omit<Board, "id">, userId: string): Promise<Board> => {
+        try {
+            const { data } = await axiosInstance.post<Board>("/boards", board, {
+                params: { id: userId },
+            });
+            return data;
+        } catch (error: any) {
+            console.error("Failed to create board:", error.response?.data?.message || error.message);
+            throw error;
+        }
     },
 
     // Update an existing board
-    updateBoard: async (boardData: Board): Promise<Board> => {
-        return new Promise(resolve => {
-            setTimeout(() => {
-                // In a real implementation, we would update the server
-                resolve(boardData);
-            }, 300);
-        });
+    updateBoard: async (board: Board): Promise<Board> => {
+        try {
+            const { data } = await axiosInstance.put<Board>(`/boards/${board.id}`, board);
+            return data;
+        } catch (error: any) {
+            console.error(`Failed to update board ${board.id}:`, error.response?.data?.message || error.message);
+            throw error;
+        }
     },
 
     // Delete a board
-    deleteBoard: async (id: number): Promise<boolean> => {
-        return new Promise(resolve => {
-            setTimeout(() => {
-                // In a real implementation, we would delete from the server
-                resolve(true);
-            }, 300);
-        });
+    deleteBoard: async (id: string): Promise<boolean> => {
+        try {
+            await axiosInstance.delete(`/boards/${id}`);
+            return true;
+        } catch (error: any) {
+            console.error(`Failed to delete board ${id}:`, error.response?.data?.message || error.message);
+            throw error;
+        }
     },
 };

@@ -16,7 +16,7 @@ import { Board } from "@/entities/board/model/types";
 import Link from "next/link";
 
 interface BoardCardProps extends Board {
-    onDelete?: (id: number) => void;
+    onDelete?: (id: string) => void;
 }
 
 export const BoardCard = ({ id, name, description, color, tasksCount = 0, onDelete }: BoardCardProps) => {
@@ -27,6 +27,9 @@ export const BoardCard = ({ id, name, description, color, tasksCount = 0, onDele
         e.stopPropagation();
 
         deleteBoardMutation.mutate(id);
+        if (onDelete) {
+            onDelete(id);
+        }
     };
 
     return (

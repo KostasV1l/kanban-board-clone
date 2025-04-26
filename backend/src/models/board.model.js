@@ -11,15 +11,12 @@ const BoardSchema = new mongoose.Schema(
         user: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
-            required: false, // Optional for guests
         },
         guestId: {
             type: String,
-            required: false, // Only required for guest boards
         },
         description: {
             type: String,
-            required: false,
             trim: true,
         },
         lists: [
@@ -30,7 +27,6 @@ const BoardSchema = new mongoose.Schema(
         ],
         color: {
             type: String,
-            required: false,
             default: "bg-blue-500",
         },
     },

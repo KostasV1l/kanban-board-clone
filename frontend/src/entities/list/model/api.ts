@@ -3,10 +3,10 @@ import { CreateListDto, List, UpdateListDto } from "./types";
 // Base API functions for list operations -> Used in Tanstack Query hooks
 export const ListAPI = {
     // Get all lists for a board
-    getLists: async (boardId: number): Promise<List[]> => {
+    getLists: async (boardId: number, userId: string): Promise<List[]> => {
         try {
             // TODO: Change to actual API endpoint
-            const res = await fetch(`/api/boards/${boardId}/lists`);
+            const res = await fetch(`/api/boards/${boardId}/lists?userId=${userId}`);
 
             if (!res.ok) {
                 const errorData = await res.json();
@@ -21,10 +21,10 @@ export const ListAPI = {
     },
 
     // Get a single list by ID
-    getList: async (id: number): Promise<List> => {
+    getList: async (id: number, userId: string): Promise<List> => {
         try {
             // TODO: Change to actual API endpoint
-            const res = await fetch(`/api/lists/${id}`);
+            const res = await fetch(`/api/lists/${id}?userId=${userId}`);
 
             if (!res.ok) {
                 const errorData = await res.json();
@@ -39,10 +39,10 @@ export const ListAPI = {
     },
 
     // Create a new list
-    createList: async (data: CreateListDto): Promise<List> => {
+    createList: async (data: CreateListDto, userId: string): Promise<List> => {
         try {
             // TODO: Change to actual API endpoint
-            const res = await fetch("/api/lists", {
+            const res = await fetch(`/api/lists?userId=${userId}`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -64,10 +64,10 @@ export const ListAPI = {
     },
 
     // Update a list
-    updateList: async (id: number, data: UpdateListDto): Promise<List> => {
+    updateList: async (id: number, data: UpdateListDto, userId: string): Promise<List> => {
         try {
             // TODO: Change to actual API endpoint
-            const res = await fetch(`/api/lists/${id}`, {
+            const res = await fetch(`/api/lists/${id}?userId=${userId}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -89,10 +89,10 @@ export const ListAPI = {
     },
 
     // Delete a list
-    deleteList: async (id: number): Promise<void> => {
+    deleteList: async (id: number, userId: string): Promise<void> => {
         try {
             // TODO: Change to actual API endpoint
-            const res = await fetch(`/api/lists/${id}`, {
+            const res = await fetch(`/api/lists/${id}?userId=${userId}`, {
                 method: "DELETE",
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem("jwt")}`,
@@ -110,10 +110,10 @@ export const ListAPI = {
     },
 
     // Reorder lists within a board
-    reorderLists: async (boardId: number, listIds: number[]): Promise<List[]> => {
+    reorderLists: async (boardId: number, listIds: number[], userId: string): Promise<List[]> => {
         try {
             // TODO: Change to actual API endpoint
-            const res = await fetch(`/api/boards/${boardId}/lists/reorder`, {
+            const res = await fetch(`/api/boards/${boardId}/lists/reorder?userId=${userId}`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

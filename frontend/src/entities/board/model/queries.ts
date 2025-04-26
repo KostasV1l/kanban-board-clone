@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCurrentUser } from "@features/auth/hooks";
 import { BoardAPI } from "./api";
 import { boardKeys } from "./keys";
 import { Board } from "./types";
@@ -10,14 +11,18 @@ import { Board } from "./types";
 
 // Get all boards
 export const useBoards = () => {
+    const { data: currentUser } = useCurrentUser();
+    const userId = currentUser?.id || "";
+
     return useQuery({
         queryKey: boardKeys.lists(),
-        queryFn: () => BoardAPI.getBoards(),
+        queryFn: () => BoardAPI.getBoards(userId),
+        enabled: !!userId, // Only run the query if we have a userId
     });
 };
 
 // Get a single board by ID
-export const useBoard = (id: number) => {
+export const useBoard = (id: string) => {
     return useQuery({
         queryKey: boardKeys.detail(id),
         queryFn: () => BoardAPI.getBoard(id),
@@ -28,9 +33,11 @@ export const useBoard = (id: number) => {
 // Create a new board
 export const useCreateBoard = () => {
     const queryClient = useQueryClient();
+    const { data: currentUser } = useCurrentUser();
+    const userId = currentUser?.id || "";
 
     return useMutation({
-        mutationFn: (board: Omit<Board, "id">) => BoardAPI.createBoard(board),
+        mutationFn: (board: Omit<Board, "id">) => BoardAPI.createBoard(board, userId),
         onSuccess: newBoard => {
             // Invalidate and refetch
             queryClient.invalidateQueries({ queryKey: boardKeys.lists() });
@@ -66,7 +73,7 @@ export const useDeleteBoard = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (id: number) => BoardAPI.deleteBoard(id),
+        mutationFn: (id: string) => BoardAPI.deleteBoard(id),
         onSuccess: (_, id) => {
             // Update the boards list
             queryClient.setQueryData(boardKeys.lists(), (old: Board[] | undefined) =>
