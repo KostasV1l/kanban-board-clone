@@ -8,7 +8,7 @@ exports.register = async (req, res, next) => {
     res.status(201).json({
       success: true,
       csrfToken,
-      user: { id: user._id, username: user.username, email: user.email },
+      user: { id: user.id, username: user.username, email: user.email },
     });
   } catch (error) {
     if (error.message === "USER_EXISTS") {
@@ -25,7 +25,7 @@ exports.login = async (req, res, next) => {
     res.status(200).json({
       success: true,
       csrfToken,
-      user: { id: user._id, username: user.username, email: user.email },
+      user: { id: user.id, username: user.username, email: user.email },
     });
   } catch (err) {
     const code = err.message === "INVALID_CREDENTIALS" ? 401 : 500;
@@ -59,9 +59,9 @@ exports.logout = async (req, res) => {
   res.status(200).json({ success: true, message: "Logged out successfully" });
 };
 exports.getCurrentUser = (req, res) => {
-  const { _id, username, email } = req.user;
+  const { id, username, email } = req.user;
   res.status(200).json({
     success: true,
-    user: { id: _id, username, email },
+    user: { id, username, email },
   });
 };
