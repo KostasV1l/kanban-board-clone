@@ -18,9 +18,9 @@ export default function RootLayout({
 }>) {
     return (
         <>
-            <html lang="en" suppressHydrationWarning>
+            <html lang="en-GB" suppressHydrationWarning>
                 <head />
-                <body className="font-sans min-h-screen selection:bg-blue-950 selection:text-white flex flex-col">
+                <body className="font-sans min-h-screen selection:bg-blue-950 selection:text-white dark:selection:bg-white dark:selection:text-blue-950  flex flex-col">
                     <Providers>
                         <div className="flex flex-col min-h-screen flex-grow">
                             {children}

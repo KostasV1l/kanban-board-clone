@@ -1,12 +1,12 @@
 "use client";
 
 import React from "react";
-import { BoardHeader } from "@/components/DashboardPage/board-header";
-import { BoardList } from "@/components/DashboardPage/board-list";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useBoards, useCreateBoard, useDeleteBoard } from "@/entities/board/model/queries";
+import { BoardList } from "@/features/dashboard/board-list";
 import { Metadata } from "next";
-import Greeting from "../../../components/DashboardPage/greeting";
+import { BoardHeader } from "@widgets/DashboardPage/board-header";
+import Greeting from "@widgets/DashboardPage/greeting";
 
 export const metadata: Metadata = {
     title: "Dashboard | TASKFLOW",

@@ -1,4 +1,3 @@
-import { ModeToggle } from "@/components/dark-mode/mode-toggle";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/ui/logo";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -39,9 +38,6 @@ export const LoginPage = () => {
                     </div>
                 </div>
             </section>
-            <div className="absolute bottom-4 right-4">
-                <ModeToggle />
-            </div>
         </div>
     );
 };

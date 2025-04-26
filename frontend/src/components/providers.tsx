@@ -12,7 +12,7 @@ export function Providers({ children }: { children: ReactNode }) {
             <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
                 {children}
             </ThemeProvider>
-            <ReactQueryDevtools initialIsOpen={false} />
+            {/* <ReactQueryDevtools initialIsOpen={false} /> */}
         </QueryClientProvider>
     );
 }
