@@ -3,10 +3,10 @@
 import React from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useBoards, useCreateBoard, useDeleteBoard } from "@/entities/board/model/queries";
-import { BoardHeader } from "@/features/dashboard/board-header";
 import { BoardList } from "@/features/dashboard/board-list";
-import Greeting from "@/features/dashboard/greeting";
 import { Metadata } from "next";
+import { BoardHeader } from "@widgets/DashboardPage/board-header";
+import Greeting from "@widgets/DashboardPage/greeting";
 
 export const metadata: Metadata = {
     title: "Dashboard | TASKFLOW",
