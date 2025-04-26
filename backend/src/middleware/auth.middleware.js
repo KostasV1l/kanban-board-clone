@@ -4,7 +4,8 @@ const { verifyAccessToken } = require("../utils/jwt.utils");
 exports.protect = async (req, res, next) => {
   try {
     const accessToken = req.cookies.accessToken;
-    const crsfToken = req.cookies["x-crsf-token"];
+    const csrfTokenHeader = req.headers["x-csrf-token"];
+    const csrfTokenCookie = req.cookies["csrf-token"];
 
     if (!accessToken) {
       return res.status(401).json({ message: "Not authenticated" });
@@ -12,7 +13,7 @@ exports.protect = async (req, res, next) => {
 
     if (
       !req.path.includes("/refresh") &&
-      req.cookies["csrf-token"] !== crsfToken
+      ( !csrfTokenHeader || !csrfTokenCookie || csrfTokenHeader !== csrfTokenCookie )
     ) {
       return res.status(403).json({ message: "Invalid CSRF token" });
     }
@@ -25,6 +26,7 @@ exports.protect = async (req, res, next) => {
     }
     next();
   } catch (err) {
+    console.log(err);
     return res.status(401).json({ message: "Not authenticated" });
   }
 };

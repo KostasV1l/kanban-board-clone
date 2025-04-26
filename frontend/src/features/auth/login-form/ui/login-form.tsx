@@ -1,24 +1,33 @@
 "use client";
 
 import { LucideX } from "lucide-react";
+import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useLoginForm } from "../model";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useLogin } from "@features/auth/hooks";
+import { LoginFormData, loginSchema } from "../model";
 
 export function LoginForm() {
-    const { form, handleLogin, serverError } = useLoginForm();
+    const { mutate: login, isPending, error: loginError } = useLogin();
+
     const {
         register,
         handleSubmit,
-        formState: { errors, isSubmitting },
-    } = form;
+        formState: { errors },
+    } = useForm<LoginFormData>({
+        resolver: zodResolver(loginSchema),
+    });
+    const onSubmit = (data: LoginFormData) => {
+        login(data);
+    };
 
     return (
-        <form onSubmit={handleSubmit(handleLogin)} className="space-y-4">
-            {serverError && (
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            {loginError && (
                 <div className="flex items-center font-sans p-3 gap-x-4 rounded-md bg-red-50 text-red-500 text-sm">
-                    <LucideX className="inline size-5" /> {serverError}
+                    <LucideX className="inline size-5" /> {loginError.message}
                 </div>
             )}
             <div className="space-y-2">
@@ -43,8 +52,8 @@ export function LoginForm() {
                 />
                 {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
             </div>
-            <Button className="w-full mt-4 cursor-pointer" disabled={isSubmitting}>
-                {isSubmitting ? "Logging in..." : "Login"}
+            <Button className="w-full mt-4 cursor-pointer" disabled={isPending}>
+                {isPending ? "Logging in..." : "Login"}
             </Button>
         </form>
     );
