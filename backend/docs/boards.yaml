@@ -1,0 +1,259 @@
+openapi: 3.0.0
+info:
+    title: Kanban Board API
+    version: 1.0.0
+    description: API documentation for Kanban Board application
+components:
+    schemas:
+        Board:
+            type: object
+            required:
+                - name
+            properties:
+                _id:
+                    type: string
+                    description: Board identifier
+                name:
+                    type: string
+                    description: Name of the board
+                user:
+                    type: string
+                    description: ID of the user who owns the board
+                guestId:
+                    type: string
+                    description: ID of the guest user (for guest boards)
+                description:
+                    type: string
+                    description: Optional description of the board
+                lists:
+                    type: array
+                    items:
+                        type: string
+                    description: Array of IDs referring to Column documents
+                color:
+                    type: string
+                    description: Optional color theme of the board
+                    example: bg-blue-500
+                createdAt:
+                    type: string
+                    format: date-time
+                    description: Date when the board was created
+                updatedAt:
+                    type: string
+                    format: date-time
+                    description: Date when the board was last updated
+
+paths:
+    /boards:
+        get:
+            summary: Get all boards for authenticated user
+            tags:
+                - Boards
+            security:
+                - bearerAuth: []
+            parameters:
+                - in: query
+                  name: userId
+                  schema:
+                      type: string
+                  description: Optional user ID to filter boards
+            responses:
+                200:
+                    description: List of boards
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: "#/components/schemas/Board"
+                401:
+                    description: Unauthorized
+        post:
+            summary: Create a new board
+            tags:
+                - Boards
+            security:
+                - bearerAuth: []
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - name
+                            properties:
+                                name:
+                                    type: string
+                                    example: "New Project"
+                                description:
+                                    type: string
+                                    example: "My new project board"
+                                color:
+                                    type: string
+                                    example: "bg-blue-500"
+            responses:
+                201:
+                    description: Board created successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Board"
+                400:
+                    description: Invalid input data
+                401:
+                    description: Unauthorized
+
+    /boards/guest/{guestId}:
+        get:
+            summary: Get boards for a guest user
+            tags:
+                - Boards
+            parameters:
+                - in: path
+                  name: guestId
+                  required: true
+                  schema:
+                      type: string
+                  description: ID of the guest user
+            responses:
+                200:
+                    description: List of boards for guest user
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: "#/components/schemas/Board"
+                404:
+                    description: No boards found for this guest
+        post:
+            summary: Create a board for guest user
+            tags:
+                - Boards
+            parameters:
+                - in: path
+                  name: guestId
+                  required: true
+                  schema:
+                      type: string
+                  description: ID of the guest user
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - name
+                            properties:
+                                name:
+                                    type: string
+                                    example: "Guest Project"
+                                description:
+                                    type: string
+                                    example: "Guest project board"
+                                color:
+                                    type: string
+                                    example: "bg-green-500"
+            responses:
+                201:
+                    description: Board created successfully for guest
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Board"
+                400:
+                    description: Invalid input data
+                404:
+                    description: Guest not found
+
+    /boards/{boardId}:
+        get:
+            summary: Get a specific board
+            tags:
+                - Boards
+            security:
+                - bearerAuth: []
+            parameters:
+                - in: path
+                  name: boardId
+                  required: true
+                  schema:
+                      type: string
+                  description: ID of the board to retrieve
+            responses:
+                200:
+                    description: Board details
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Board"
+                401:
+                    description: Unauthorized to access this board
+                404:
+                    description: Board not found
+        put:
+            summary: Update a specific board
+            tags:
+                - Boards
+            security:
+                - bearerAuth: []
+            parameters:
+                - in: path
+                  name: boardId
+                  required: true
+                  schema:
+                      type: string
+                  description: ID of the board to update
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - name
+                            properties:
+                                name:
+                                    type: string
+                                    example: "Updated Project Name"
+                                description:
+                                    type: string
+                                    example: "Updated description"
+                                color:
+                                    type: string
+                                    example: "bg-purple-500"
+            responses:
+                200:
+                    description: Board updated successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Board"
+                400:
+                    description: Invalid input data
+                401:
+                    description: Not authorized to update this board
+                404:
+                    description: Board not found
+        delete:
+            summary: Delete a specific board
+            tags:
+                - Boards
+            security:
+                - bearerAuth: []
+            parameters:
+                - in: path
+                  name: boardId
+                  required: true
+                  schema:
+                      type: string
+                  description: ID of the board to delete
+            responses:
+                204:
+                    description: Board deleted successfully
+                401:
+                    description: Not authorized to delete this board
+                404:
+                    description: Board not found

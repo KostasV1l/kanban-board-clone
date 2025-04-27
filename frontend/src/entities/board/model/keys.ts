@@ -7,5 +7,5 @@ export const boardKeys = {
     lists: () => [...boardKeys.all, "list"] as const,
     list: (filters: string) => [...boardKeys.lists(), { filters }] as const,
     details: () => [...boardKeys.all, "detail"] as const,
-    detail: (id: number) => [...boardKeys.details(), id] as const,
+    detail: (id: string) => [...boardKeys.details(), id] as const,
 };
