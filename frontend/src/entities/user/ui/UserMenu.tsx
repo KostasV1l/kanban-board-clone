@@ -11,8 +11,8 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useBoards } from "@/entities/board/model/queries";
 import { useAuthStatus, useLogout } from "@/features/auth/hooks";
+import { useBoards } from "@/features/board/hooks";
 import Link from "next/link";
 
 export function UserMenu() {

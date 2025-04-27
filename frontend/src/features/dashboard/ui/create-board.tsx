@@ -1,10 +1,10 @@
-import { KanbanSquare, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { useCreateBoard } from "@/entities/board/model/queries";
+import { useCreateBoard } from "@/features/board/hooks";
 
 const BOARD_COLORS = [
     { label: "Blue", value: "bg-blue-600" },

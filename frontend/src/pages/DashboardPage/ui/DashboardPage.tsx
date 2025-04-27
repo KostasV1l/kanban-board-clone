@@ -2,10 +2,10 @@
 
 import React, { useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useBoards } from "@/entities/board/model/queries";
-import { BoardList } from "@/features/dashboard/board-list";
+import { useBoards } from "@/features/board/hooks";
 import { Metadata } from "next";
 import { AuthAPI } from "@features/auth";
+import { BoardList } from "@features/dashboard/ui/board-list";
 import { BoardHeader } from "@widgets/DashboardPage/board-header";
 import Greeting from "@widgets/DashboardPage/greeting";
 

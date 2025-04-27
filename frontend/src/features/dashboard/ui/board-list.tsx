@@ -1,6 +1,6 @@
 "use client";
 
-import { BoardCard } from "@/components/DashboardPage/ui/board-card";
+import { BoardCard } from "@features/dashboard/ui/board-card";
 import { Board } from "@/entities/board/model/types";
 
 export const BoardList = ({ boardsList }: { boardsList: Board[] }) => {

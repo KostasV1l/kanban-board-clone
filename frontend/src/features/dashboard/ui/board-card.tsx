@@ -11,8 +11,8 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { useDeleteBoard } from "@/entities/board/model/queries";
 import { Board } from "@/entities/board/model/types";
+import { useDeleteBoard } from "@/features/board/hooks";
 import Link from "next/link";
 
 interface BoardCardProps extends Board {
