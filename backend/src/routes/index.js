@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const authRoutes = require("./auth.routes");
 const boardRoutes = require("./board.routes");
+const listRoutes = require("./list.routes");
 
 // Health check endpoint
 router.get("/health", (req, res) => {
@@ -14,5 +15,8 @@ router.use("/auth", authRoutes);
 
 // Boards routes
 router.use("/boards", boardRoutes);
+
+// List routes
+router.use("/:boardId/", listRoutes);
 
 module.exports = router;
