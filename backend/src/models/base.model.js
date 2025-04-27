@@ -8,8 +8,8 @@ const baseOptions = {
         versionKey: false,
         transform(doc, ret) {
             ret.id = ret._id.toString();
-            // delete ret._id;
-            // delete ret.__v;
+            delete ret._id;
+            delete ret.__v;
         },
     },
     toObject: {
@@ -17,8 +17,8 @@ const baseOptions = {
         versionKey: false,
         transform(doc, ret) {
             ret.id = ret._id.toString();
-            // delete ret._id;
-            // delete ret.__v;
+            delete ret._id;
+            delete ret.__v;
         },
     },
 };

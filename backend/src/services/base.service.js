@@ -19,7 +19,8 @@ class BaseService {
     // Find one document by ID
     async findById(id) {
         try {
-            return await this.model.findById(id);
+            const document = await this.model.findById(id);
+            return document.toJSON();
         } catch (error) {
             throw error;
         }
@@ -28,7 +29,8 @@ class BaseService {
     // Find all documents (with optional filter)
     async findAll(filter = {}) {
         try {
-            return await this.model.find(filter);
+            const documents = await this.model.find(filter);
+            return documents.map((doc) => doc.toJSON());
         } catch (error) {
             throw error;
         }
@@ -37,7 +39,8 @@ class BaseService {
     // Update a document by ID
     async update(id, data) {
         try {
-            return await this.model.findByIdAndUpdate(id, data, { new: true, runValidators: true });
+            const document = await this.model.findByIdAndUpdate(id, data, { new: true, runValidators: true });
+            return document.toJSON();
         } catch (error) {
             throw error;
         }
@@ -46,7 +49,8 @@ class BaseService {
     // Delete a document by ID
     async delete(id) {
         try {
-            return await this.model.findByIdAndDelete(id);
+            const document = await this.model.findByIdAndDelete(id);
+            return document.toJSON();
         } catch (error) {
             throw error;
         }

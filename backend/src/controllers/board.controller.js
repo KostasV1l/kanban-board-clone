@@ -11,11 +11,11 @@ exports.getBoards = async (req, res, next) => {
             boards = await boardService.getBoardsByUser(req.query.userId);
         } else {
             // Check if user is authenticated
-            if (!req.user || !req.user._id) {
+            if (!req.user || !req.user.id) {
                 return res.status(401).json({ message: "User authentication required" });
             }
             // Get boards for the current authenticated user
-            boards = await boardService.getBoardsByUser(req.user._id);
+            boards = await boardService.getBoardsByUser(req.user.id);
         }
 
         res.status(200).json(boards);
@@ -53,7 +53,7 @@ exports.createBoard = async (req, res, next) => {
         }
 
         // Check if user is authenticated
-        if (!req.user || !req.user._id) {
+        if (!req.user || !req.user.id) {
             return res.status(401).json({ message: "User authentication required" });
         }
 
@@ -61,7 +61,7 @@ exports.createBoard = async (req, res, next) => {
             name,
             description,
             color,
-            user: req.user._id,
+            user: req.user.id,
         });
 
         res.status(201).json(board);
@@ -105,7 +105,7 @@ exports.getBoard = async (req, res, next) => {
         }
 
         // Check ownership for authenticated users
-        if (board.user && req.user && board.user.toString() !== req.user._id?.toString()) {
+        if (board.user && req.user && board.user.toString() !== req.user.id?.toString()) {
             return res.status(401).json({ message: "Not authorized to access this board" });
         }
 
@@ -132,7 +132,7 @@ exports.updateBoard = async (req, res, next) => {
         }
 
         // Check ownership
-        if (board.user && req.user && board.user.toString() !== req.user._id?.toString()) {
+        if (board.user && req.user && board.user.toString() !== req.user.id?.toString()) {
             return res.status(401).json({ message: "Not authorized to update this board" });
         }
 
@@ -155,7 +155,7 @@ exports.deleteBoard = async (req, res, next) => {
         }
 
         // Check ownership
-        if (board.user && req.user && board.user.toString() !== req.user._id?.toString()) {
+        if (board.user && req.user && board.user.toString() !== req.user.id?.toString()) {
             return res.status(401).json({ message: "Not authorized to delete this board" });
         }
 

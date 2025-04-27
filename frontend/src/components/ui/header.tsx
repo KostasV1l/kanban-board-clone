@@ -7,11 +7,11 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { UserMenu } from "@/entities/user/ui/UserMenu";
+import { useAuthStatus } from "@/features/auth/hooks";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
 import { Logo } from "./logo";
-import { UserMenu } from "@/entities/user/ui/UserMenu";
-import { useAuthStatus } from "@/features/auth/hooks";
 
 export const Header = () => {
     const { isAuthenticated } = useAuthStatus();
@@ -21,15 +21,15 @@ export const Header = () => {
             <Link href="/">
                 <Logo />
             </Link>
-            
+
             {isAuthenticated ? (
                 <UserMenu />
             ) : (
                 <DropdownMenu>
                     <DropdownMenuTrigger className="flex items-center">
-                        <Avatar className="cursor-pointer rounded-xl border border-primary">
+                        <Avatar className="cursor-pointer rounded-full border border-primary">
                             <AvatarImage src="https://github.com/shadcn.png" />
-                            <AvatarFallback>CN</AvatarFallback>
+                            <AvatarFallback className="bg-accent">G</AvatarFallback>
                         </Avatar>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="w-64 me-2 py-3 px-2">
@@ -38,7 +38,7 @@ export const Header = () => {
                             <div className="mb-2 flex items-center gap-x-4">
                                 <Avatar className="size-10">
                                     <AvatarImage src="https://github.com/shadcn.png" />
-                                    <AvatarFallback>CN</AvatarFallback>
+                                    <AvatarFallback>G</AvatarFallback>
                                 </Avatar>
                                 <div className="flex flex-col">
                                     <span className="text-sm font-semibold">Guest user</span>

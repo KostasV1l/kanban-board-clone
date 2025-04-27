@@ -8,12 +8,12 @@ class BoardService extends BaseService {
 
     async getBoardsByUser(userId) {
         if (!userId) throw new Error("User ID is required");
-        return await this.model.find({ user: userId }).lean();
+        return await this.model.find({ user: userId });
     }
 
     async getBoardsByGuest(guestId) {
         if (!guestId) throw new Error("Guest ID is required");
-        return await this.model.find({ guestId }).lean();
+        return await this.model.find({ guestId });
     }
 
     async deleteAllBoardsByUser(userId) {
