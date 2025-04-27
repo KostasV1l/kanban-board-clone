@@ -67,7 +67,7 @@ export function UserMenu() {
                     <DropdownMenuItem disabled>Loading boards...</DropdownMenuItem>
                 ) : boards && boards.length > 0 ? (
                     boards.slice(0, 5).map(board => (
-                        <DropdownMenuItem key={board.id} className="mb-2" asChild>
+                        <DropdownMenuItem key={board.id} className="mb-2 cursor-pointer" asChild>
                             <Link href={`/board/${board.id}`} className="flex items-center">
                                 <KanbanSquare className="mr-2 size-4" />
                                 {board.name}
@@ -80,7 +80,7 @@ export function UserMenu() {
 
                 {boards && boards.length > 5 && (
                     <DropdownMenuItem asChild>
-                        <Link href="/dashboard" className="text-xs text-center w-full py-2">
+                        <Link href="/dashboard" className="text-xs text-center w-full py-2 cursor-pointer">
                             <ArrowRight className="mr-1 size-3" />
                             View all boards ({boards.length})
                         </Link>
@@ -88,7 +88,7 @@ export function UserMenu() {
                 )}
 
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => logout()} className="mt-2 mb-0.5">
+                <DropdownMenuItem onClick={() => logout()} className="mt-2 mb-0.5 cursor-pointer">
                     <LogOut className="mr-2 size-4" />
                     Log out
                 </DropdownMenuItem>
