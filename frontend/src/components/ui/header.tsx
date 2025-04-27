@@ -12,6 +12,8 @@ import { useAuthStatus } from "@/features/auth/hooks";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
 import { Logo } from "./logo";
+import { UserMenu } from "@/entities/user/ui/UserMenu";
+import { useAuthStatus } from "@/features/auth/hooks";
 
 export const Header = () => {
     const { isAuthenticated } = useAuthStatus();
@@ -21,6 +23,8 @@ export const Header = () => {
             <Link href="/">
                 <Logo />
             </Link>
+
+
 
             {isAuthenticated ? (
                 <UserMenu />
