@@ -1,10 +1,11 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useBoards, useCreateBoard, useDeleteBoard } from "@/entities/board/model/queries";
-import { BoardList } from "@/features/dashboard/board-list";
+import { useBoards } from "@/features/board/hooks";
 import { Metadata } from "next";
+import { AuthAPI } from "@features/auth";
+import { BoardList } from "@features/dashboard/ui/board-list";
 import { BoardHeader } from "@widgets/DashboardPage/board-header";
 import Greeting from "@widgets/DashboardPage/greeting";
 
@@ -14,26 +15,28 @@ export const metadata: Metadata = {
 };
 
 export const DashboardPage = () => {
-    // Using TanStack Query hooks instead of custom hooks
+    const [username, setUsername] = React.useState("");
     const { data: boards, isLoading, error } = useBoards();
-    const createBoard = useCreateBoard();
-    const deleteBoard = useDeleteBoard();
     const boardCount = boards ? boards.length : 0;
 
-    // Function to handle adding a new board
-    const handleAddBoard = async (boardData: { name: string; description: string; color: string }) => {
-        try {
-            await createBoard.mutateAsync(boardData);
-            // Add any success notification here if needed
-        } catch (err) {
-            // Handle error (could add toast notification)
-            console.error("Failed to add board:", err);
-        }
-    };
+    useEffect(() => {
+        const fetchUsername = async () => {
+            try {
+                const user = await AuthAPI.getCurrentUser();
+                if (user?.username) {
+                    setUsername(user.username);
+                }
+            } catch (error) {
+                console.error("Failed to fetch user:", error);
+                setUsername("Guest");
+            }
+        };
+        fetchUsername();
+    }, []);
 
     return (
         <>
-            <Greeting boardCount={boardCount} />
+            <Greeting username={username!} boardCount={boardCount} />
             <BoardHeader />
             {isLoading ? (
                 // Show skeleton UI while loading
