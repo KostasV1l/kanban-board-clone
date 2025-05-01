@@ -10,6 +10,7 @@ require('dotenv').config();
 const routes = require('./routes');
 const errorHandler = require('./middleware/errorHandler');
 const connectDB = require('./config/db');
+const authService = require('./services/auth.service');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -35,6 +36,19 @@ app.use(errorHandler);
 const startServer = async () => {
   try {
     await connectDB();
+    
+    // Run initial cleanup of expired tokens
+    await authService.cleanupExpiredTokens();
+    
+    // Schedule regular cleanup (every 24 hours)
+    setInterval(async () => {
+      try {
+        const removed = await authService.cleanupExpiredTokens();
+        console.log(`Scheduled cleanup: removed ${removed} expired tokens`);
+      } catch (err) {
+        console.error('Error in scheduled token cleanup:', err);
+      }
+    }, 24 * 60 * 60 * 1000); // 24 hours
     
     app.listen(PORT, () => {
       console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
