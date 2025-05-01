@@ -9,14 +9,9 @@ class ListService extends BaseService {
 
   async getListsByBoard(boardId) {
     if (!boardId) throw new Error("Board ID is required");
+    console.log("boardId", boardId);
 
-    const objectId = new mongoose.Types.ObjectId(boardId);
-    console.log("objectId", objectId);
-
-    const lists = await this.model.find({ boardId: objectId });
-    console.log("lists: ", lists);
-    console.log("boardID: ", boardId);
-    return lists;
+    return await this.model.find({ board: boardId });
   }
 
   async deleteAllListsByBoard(boardId) {
