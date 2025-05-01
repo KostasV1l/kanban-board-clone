@@ -13,7 +13,6 @@ import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "./avatar";
 import { Logo } from "./logo";
 
-
 export const Header = () => {
     const { isAuthenticated } = useAuthStatus();
 
