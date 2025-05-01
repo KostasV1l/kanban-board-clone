@@ -19,6 +19,19 @@ const RefreshTokenSchema = new mongoose.Schema({
     default: Date.now,
     expires: "7d",
   },
+  // Device information
+  userAgent: {
+    type: String,
+    default: "Unknown device",
+  },
+  ipAddress: {
+    type: String,
+    default: "Unknown",
+  },
+  lastUsed: {
+    type: Date,
+    default: Date.now,
+  }
 });
 
 module.exports = mongoose.model("RefreshToken", RefreshTokenSchema);
