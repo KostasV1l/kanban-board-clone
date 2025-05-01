@@ -8,6 +8,7 @@ class BoardService extends BaseService {
 
     async getBoardsByUser(userId) {
         if (!userId) throw new Error("User ID is required");
+        console.log("userId", userId);
         return await this.model.find({ user: userId });
     }
 
