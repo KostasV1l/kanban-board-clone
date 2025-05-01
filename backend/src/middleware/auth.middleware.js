@@ -7,7 +7,9 @@ exports.protect = async (req, res, next) => {
     const csrfTokenHeader = req.headers["x-csrf-token"];
     const csrfTokenCookie = req.cookies["csrf-token"];
 
+
     if (!accessToken) {
+      console.log("Authentication failed: No access token");
       return res.status(401).json({ message: "Not authenticated" });
     }
 
@@ -15,6 +17,7 @@ exports.protect = async (req, res, next) => {
       !req.path.includes("/refresh") &&
       ( !csrfTokenHeader || !csrfTokenCookie || csrfTokenHeader !== csrfTokenCookie )
     ) {
+      console.log("Authentication failed: CSRF validation failed");
       return res.status(403).json({ message: "Invalid CSRF token" });
     }
 
@@ -22,11 +25,12 @@ exports.protect = async (req, res, next) => {
 
     req.user = await User.findById(decoded.id);
     if (!req.user) {
+      console.log("Authentication failed: User not found");
       return res.status(401).json({ message: "User not found" });
     }
     next();
   } catch (err) {
-    console.log(err);
+    console.log("Authentication error:", err);
     return res.status(401).json({ message: "Not authenticated" });
   }
 };

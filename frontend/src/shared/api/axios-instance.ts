@@ -13,10 +13,10 @@ const axiosInstance = axios.create({
 
 axiosInstance.interceptors.request.use(
     config => {
-        const csrfToken = Cookies.get("csrfToken");
+        const csrfToken = Cookies.get("csrf-token");
 
         if (csrfToken) {
-            config.headers["X-CSRF-TOKEN"] = csrfToken;
+            config.headers["x-csrf-token"] = csrfToken;
         }
         return config; // proceed with the request
     },
