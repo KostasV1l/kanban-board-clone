@@ -31,6 +31,15 @@ exports.getList = async (req, res, next) => {
 // @route   POST /api/lists
 exports.createList = async (req, res, next) => {
   try {
+    const { title } = req.body;
+
+    // Validation
+    if (!title || typeof title !== "string" || !title.trim()) {
+      return res
+        .status(400)
+        .json({ message: "Title is required and must be a non-empty string." });
+    }
+
     const newList = await listService.createList(req.body);
     res.status(201).json(newList);
   } catch (error) {
@@ -67,6 +76,13 @@ exports.deleteList = async (req, res, next) => {
 // @route   PATCH /api/lists/reorder
 exports.reorderLists = async (req, res, next) => {
   try {
+    const lists = req.body;
+
+    if (!Array.isArray(lists) || lists.length === 0) {
+      return res
+        .status(400)
+        .json({ message: "Request body must be a non-empty array of lists." });
+    }
     const reorderedLists = await listService.reorderLists(req.body);
     res.status(200).json(reorderedLists);
   } catch (error) {

@@ -8,7 +8,7 @@ class ListService extends BaseService {
 
   async getListsByBoard(boardId) {
     if (!boardId) throw new Error("Board ID is required");
-    return await this.model.find({ user: boardId });
+    return await this.model.find({ board: boardId });
   }
 
   async deleteAllListsByBoard(boardId) {
