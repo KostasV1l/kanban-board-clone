@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { useGetLists } from "@entities/list/hooks";
 import { List } from "@entities/list/model";
