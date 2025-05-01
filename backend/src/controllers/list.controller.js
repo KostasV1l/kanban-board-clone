@@ -10,6 +10,8 @@ exports.getLists = async (req, res, next) => {
     if (req.query.boardId) {
       lists = await listService.getListsByBoard(req.query.boardId);
     }
+
+    console.log(lists)
     res.status(200).json(lists);
   } catch (error) {
     next(error);
@@ -67,24 +69,6 @@ exports.deleteList = async (req, res, next) => {
   try {
     await listService.deleteList(req.params.listId);
     res.status(204).end();
-  } catch (error) {
-    next(error);
-  }
-};
-
-// @desc    Reorder lists
-// @route   PATCH /api/lists/reorder
-exports.reorderLists = async (req, res, next) => {
-  try {
-    const lists = req.body;
-
-    if (!Array.isArray(lists) || lists.length === 0) {
-      return res
-        .status(400)
-        .json({ message: "Request body must be a non-empty array of lists." });
-    }
-    const reorderedLists = await listService.reorderLists(req.body);
-    res.status(200).json(reorderedLists);
   } catch (error) {
     next(error);
   }

@@ -1,24 +1,20 @@
-import { CreateListDto, List, UpdateListDto } from "./types";
+import axiosInstance from "@shared/api/axios-instance";
+import { CreateListDto, List, UpdateListDto } from "../model/types";
 
 // Base API functions for list operations -> Used in Tanstack Query hooks
 export const ListAPI = {
     // Get all lists for a board
-    getLists: async (boardId: number, userId: string): Promise<List[]> => {
+    getLists: async (boardId: string): Promise<List[]> => {
         try {
-            // TODO: Change to actual API endpoint
-            const res = await fetch(`/api/boards/${boardId}/lists?userId=${userId}`);
-
-            if (!res.ok) {
-                const errorData = await res.json();
-                throw new Error(errorData.message || "Failed to fetch lists");
-            }
-
-            return res.json();
+          const { data } = await axiosInstance.get<List[]>("/lists", {
+            params: { boardId },
+          });
+          return data;
         } catch (error) {
-            console.error("Failed to fetch lists:", error);
-            throw error;
+          console.error("Failed to fetch lists:", error);
+          throw error;
         }
-    },
+      },
 
     // Get a single list by ID
     getList: async (id: number, userId: string): Promise<List> => {

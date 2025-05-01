@@ -17,6 +17,6 @@ router.use("/auth", authRoutes);
 router.use("/boards", boardRoutes);
 
 // List routes
-router.use("/:boardId/", listRoutes);
+router.use("/lists", listRoutes);
 
 module.exports = router;

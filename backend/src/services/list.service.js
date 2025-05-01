@@ -1,5 +1,6 @@
 const BaseService = require("./base.service");
 const List = require("../models/list.model");
+const { default: mongoose } = require("mongoose");
 
 class ListService extends BaseService {
   constructor() {
@@ -8,7 +9,14 @@ class ListService extends BaseService {
 
   async getListsByBoard(boardId) {
     if (!boardId) throw new Error("Board ID is required");
-    return await this.model.find({ board: boardId });
+
+    const objectId = new mongoose.Types.ObjectId(boardId);
+    console.log("objectId", objectId);
+
+    const lists = await this.model.find({ boardId: objectId });
+    console.log("lists: ", lists);
+    console.log("boardID: ", boardId);
+    return lists;
   }
 
   async deleteAllListsByBoard(boardId) {
@@ -36,18 +44,6 @@ class ListService extends BaseService {
   async deleteList(listId) {
     if (!listId) throw new Error("List ID is required");
     return await this.model.findByIdAndDelete(listId);
-  }
-
-  async reorderLists(lists) {
-    if (!Array.isArray(lists)) {
-      throw new Error("Lists array is required for reordering");
-    }
-
-    const updatePromises = lists.map(({ _id, order }) =>
-      this.model.findByIdAndUpdate(_id, { order })
-    );
-
-    return await Promise.all(updatePromises);
   }
 }
 
