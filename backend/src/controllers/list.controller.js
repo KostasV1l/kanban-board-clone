@@ -33,13 +33,16 @@ exports.getList = async (req, res, next) => {
 // @route   POST /api/lists
 exports.createList = async (req, res, next) => {
   try {
-    const { title } = req.body;
+    console.log("Incoming body:", req.body);
 
-    // Validation
-    if (!title || typeof title !== "string" || !title.trim()) {
-      return res
-        .status(400)
-        .json({ message: "Title is required and must be a non-empty string." });
+    const { name, board, order } = req.body;
+
+    if (!name || typeof name !== "string" || !name.trim()) {
+      return res.status(400).json({ message: "Name is required" });
+    }
+
+    if (!board || order === undefined) {
+      return res.status(400).json({ message: "Board and order are required" });
     }
 
     const newList = await listService.createList(req.body);

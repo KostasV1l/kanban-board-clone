@@ -10,7 +10,7 @@ interface ListColumnProps {
 
 export const ListColumn = ({ list }: ListColumnProps) => {
     return (
-        <div className="flex h-full flex-col rounded-lg border bg-card">
+        <div className="flex h-full min-w-[250px] flex-col rounded-lg border bg-card">
             <div className="flex items-center justify-between border-b p-3">
                 <h3 className="font-medium">{list.name}</h3>
                 <span className="rounded-full bg-primary/10 px-2 py-1 text-xs font-medium">{list.tasksCount}</span>
