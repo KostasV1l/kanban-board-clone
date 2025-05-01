@@ -59,7 +59,7 @@ export const ListAPI = {
     },
 
     // Delete a list
-    deleteList: async (id: number): Promise<void> => {
+    deleteList: async (id: string): Promise<void> => {
         try {
             await axiosInstance.delete(`/lists/${id}`, {
                 headers: {

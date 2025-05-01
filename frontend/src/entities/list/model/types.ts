@@ -1,5 +1,5 @@
 export interface List {
-    id: number;
+    id: string;
     name: string;
     board: string;
     order: number; // For list ordering within a board

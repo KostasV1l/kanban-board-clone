@@ -33,8 +33,6 @@ exports.getList = async (req, res, next) => {
 // @route   POST /api/lists
 exports.createList = async (req, res, next) => {
   try {
-    console.log("Incoming body:", req.body);
-
     const { name, board, order } = req.body;
 
     if (!name || typeof name !== "string" || !name.trim()) {
@@ -70,7 +68,8 @@ exports.updateList = async (req, res, next) => {
 // @route   DELETE /api/lists/:listId
 exports.deleteList = async (req, res, next) => {
   try {
-    await listService.deleteList(req.params.listId);
+    const listId = req.params.listId;
+    await listService.deleteList(listId);
     res.status(204).end();
   } catch (error) {
     next(error);

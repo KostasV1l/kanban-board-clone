@@ -5,7 +5,7 @@ import { queryClient } from "@shared/api/query-client";
 // Delete a list
 export const useDeleteList = () => {
     return useMutation({
-        mutationFn: (id: number) => ListAPI.deleteList(id),
+        mutationFn: (id: string) => ListAPI.deleteList(id),
         onSuccess: (_, id) => {
             // We don't know the boardId here, so we invalidate all lists
             queryClient.invalidateQueries({ queryKey: listKeys.lists() });
