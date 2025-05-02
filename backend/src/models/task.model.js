@@ -57,6 +57,7 @@ TaskSchema.index({ guestId: 1 });
 TaskSchema.index({ list: 1 });
 TaskSchema.index({ board: 1 });
 TaskSchema.index({ assignedTo: 1 });
+TaskSchema.index({ list: 1, order: 1 });
 
 const Task = mongoose.model("Task", TaskSchema);
 module.exports = Task;

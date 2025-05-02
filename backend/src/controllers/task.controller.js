@@ -42,20 +42,39 @@ exports.getTask = async (req, res, next) => {
 // @route   POST /api/tasks
 exports.createTask = async (req, res, next) => {
   try {
-    const { title, list, board } = req.body;
+    const { title, listId, boardId } = req.body;
 
     // Validation
-    if (!title || !list || !board) {
+    if (!title || !listId || !boardId) {
       return res.status(400).json({
-        message: "Title, list, and board are required fields.",
+        message: "Title, listId, and boardId are required fields.",
       });
     }
 
+    req.body.list = listId;
+    req.body.board = boardId;
     req.body.createdBy = req.user.id;
 
     // Create the task
     const task = await taskService.createTask(req.body);
-    res.status(201).json(task);
+
+    const responseTask = {
+      id: task.id,
+      title: task.title,
+      description: task.description || "",
+      order: task.order,
+      status: task.status,
+      priority: task.priority,
+      dueDate: task.dueDate,
+      assignedTo: task.assignedTo,
+      createdBy: task.createdBy,
+      createdAt: task.createdAt,
+      updatedAt: task.updatedAt,
+      listId: task.list.toString(),
+      boardId: task.board.toString()
+    };
+
+    res.status(201).json(responseTask);
   } catch (error) {
     next(error);
   }
