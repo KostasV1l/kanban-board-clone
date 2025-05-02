@@ -5,7 +5,26 @@ const taskService = require("../services/task.service");
 exports.getTasksByList = async (req, res, next) => {
   try {
     const tasks = await taskService.getTasksByList(req.params.listId);
-    res.status(200).json(tasks);
+
+    const responseTasks = tasks.map((task) => {
+      return {
+        id: task.id,
+        title: task.title,
+        description: task.description || "",
+        order: task.order,
+        status: task.status,
+        priority: task.priority,
+        dueDate: task.dueDate,
+        assignedTo: task.assignedTo,
+        createdBy: task.createdBy,
+        createdAt: task.createdAt,
+        updatedAt: task.updatedAt,
+        listId: task.list.toString(),
+        boardId: task.board.toString(),
+      };
+    });
+
+    res.status(200).json(responseTasks);
   } catch (error) {
     next(error);
   }
@@ -71,7 +90,7 @@ exports.createTask = async (req, res, next) => {
       createdAt: task.createdAt,
       updatedAt: task.updatedAt,
       listId: task.list.toString(),
-      boardId: task.board.toString()
+      boardId: task.board.toString(),
     };
 
     res.status(201).json(responseTask);
@@ -114,7 +133,24 @@ exports.deleteTask = async (req, res, next) => {
 
     // Delete the task
     await taskService.deleteTask(taskId);
-    res.status(204).end();
+
+    const responseTask = {
+      id: existingTask.id,
+      title: existingTask.title,
+      description: existingTask.description || "",
+      order: existingTask.order,
+      status: existingTask.status,
+      priority: existingTask.priority,
+      dueDate: existingTask.dueDate,
+      assignedTo: existingTask.assignedTo,
+      createdBy: existingTask.createdBy,
+      createdAt: existingTask.createdAt,
+      updatedAt: existingTask.updatedAt,
+      listId: existingTask.list.toString(),
+      boardId: existingTask.board.toString(),
+    };
+
+    res.status(200).json(responseTask);
   } catch (error) {
     next(error);
   }

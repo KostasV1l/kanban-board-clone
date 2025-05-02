@@ -1,6 +1,7 @@
 import { ITask } from "../model";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { CardOptionsButton } from "@features/task/ui/task-options";
 
 interface TaskCardProps {
   task: ITask;
@@ -24,9 +25,11 @@ export const TaskCard = ({ task, onClick }: TaskCardProps) => {
 
   return (
     <div 
-      className="rounded-md border bg-card p-3 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+      className="rounded-md border bg-card p-3 shadow-sm hover:shadow-md transition-shadow cursor-pointer relative group"
       onClick={() => onClick?.(task)}
     >
+      <CardOptionsButton taskId={task.id} listId={task.listId} />
+      
       <h3 className="font-medium text-sm">{task.title}</h3>
       
       {task.description && (
