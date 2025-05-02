@@ -33,13 +33,14 @@ exports.getList = async (req, res, next) => {
 // @route   POST /api/lists
 exports.createList = async (req, res, next) => {
   try {
-    const { title } = req.body;
+    const { name, board, order } = req.body;
 
-    // Validation
-    if (!title || typeof title !== "string" || !title.trim()) {
-      return res
-        .status(400)
-        .json({ message: "Title is required and must be a non-empty string." });
+    if (!name || typeof name !== "string" || !name.trim()) {
+      return res.status(400).json({ message: "Name is required" });
+    }
+
+    if (!board || order === undefined) {
+      return res.status(400).json({ message: "Board and order are required" });
     }
 
     const newList = await listService.createList(req.body);
@@ -67,7 +68,8 @@ exports.updateList = async (req, res, next) => {
 // @route   DELETE /api/lists/:listId
 exports.deleteList = async (req, res, next) => {
   try {
-    await listService.deleteList(req.params.listId);
+    const listId = req.params.listId;
+    await listService.deleteList(listId);
     res.status(204).end();
   } catch (error) {
     next(error);

@@ -1,6 +1,7 @@
 const BaseService = require("./base.service");
 const List = require("../models/list.model");
-const { default: mongoose } = require("mongoose");
+const Board = require("../models/board.model");
+const mongoose = require("mongoose");
 
 class ListService extends BaseService {
   constructor() {
@@ -25,10 +26,29 @@ class ListService extends BaseService {
   }
 
   async createList(data) {
-    if (!data?.title || data.order === undefined) {
-      throw new Error("Title and order are required");
+    const session = await mongoose.startSession();
+
+    try {
+      session.startTransaction();
+
+      // Create the list
+      const list = await this.model.create([data], { session });
+
+      // Add list ID to board.lists[]
+      await Board.findByIdAndUpdate(
+        data.board,
+        { $push: { lists: list[0]._id } },
+        { session }
+      );
+
+      await session.commitTransaction();
+      return list[0];
+    } catch (error) {
+      await session.abortTransaction();
+      throw error;
+    } finally {
+      session.endSession();
     }
-    return await this.model.create(data);
   }
 
   async updateList(listId, data) {
@@ -38,7 +58,34 @@ class ListService extends BaseService {
 
   async deleteList(listId) {
     if (!listId) throw new Error("List ID is required");
-    return await this.model.findByIdAndDelete(listId);
+  
+    const session = await mongoose.startSession();
+  
+    try {
+      session.startTransaction();
+  
+      // Find the list first to get the board ID
+      const list = await this.model.findById(listId).session(session);
+      if (!list) throw new Error("List not found");
+  
+      // Delete the list
+      await this.model.findByIdAndDelete(listId).session(session);
+  
+      // Remove list ID from Board.lists[]
+      await Board.findByIdAndUpdate(
+        list.board,
+        { $pull: { lists: list._id } },
+        { session }
+      );
+  
+      await session.commitTransaction();
+      return list; // Optionally return the deleted list
+    } catch (error) {
+      await session.abortTransaction();
+      throw error;
+    } finally {
+      session.endSession();
+    }
   }
 }
 

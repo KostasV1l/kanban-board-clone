@@ -1,13 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import { useGetLists } from "@entities/list/hooks";
 import { List } from "@entities/list/model";
 import { ListColumn } from "@widgets/DashboardPage/list-column";
-import { useGetLists } from "@entities/list/hooks";
+import { NewListColumn } from "@widgets/DashboardPage/new-column";
 
 export const dynamic = "force-dynamic";
-
 
 const BoardPage = () => {
     const { id } = useParams() as { id: string };
@@ -24,15 +23,11 @@ const BoardPage = () => {
 
     return (
         <div>
-            <h1>Board Page</h1>
-            <p>Board ID: {id}</p>
-
             <div style={{ display: "flex", gap: "16px", overflowX: "auto" }}>
-                {dataLists.length === 0 ? (
-                    <p>No lists yet</p>
-                ) : (
-                    dataLists.map((list: List) => <ListColumn key={list.id} list={list} />)
-                )}
+                {dataLists.map((list: List) => (
+                    <ListColumn key={list.id} list={list} />
+                ))}
+                <NewListColumn currentLength={dataLists.length} boardId={id} />
             </div>
         </div>
     );

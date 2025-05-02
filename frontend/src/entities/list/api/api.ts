@@ -6,28 +6,22 @@ export const ListAPI = {
     // Get all lists for a board
     getLists: async (boardId: string): Promise<List[]> => {
         try {
-          const { data } = await axiosInstance.get<List[]>("/lists", {
-            params: { boardId },
-          });
-          return data;
+            const { data } = await axiosInstance.get<List[]>("/lists", {
+                params: { boardId },
+            });
+            return data;
         } catch (error) {
-          console.error("Failed to fetch lists:", error);
-          throw error;
+            console.error("Failed to fetch lists:", error);
+            throw error;
         }
-      },
+    },
 
     // Get a single list by ID
-    getList: async (id: number, userId: string): Promise<List> => {
+    getList: async (id: number): Promise<List> => {
         try {
             // TODO: Change to actual API endpoint
-            const res = await fetch(`/api/lists/${id}?userId=${userId}`);
-
-            if (!res.ok) {
-                const errorData = await res.json();
-                throw new Error(errorData.message || "Failed to fetch list");
-            }
-
-            return res.json();
+            const { data } = await axiosInstance.get<List>(`lists/${id}`);
+            return data;
         } catch (error) {
             console.error("Failed to fetch list:", error);
             throw error;
@@ -35,24 +29,14 @@ export const ListAPI = {
     },
 
     // Create a new list
-    createList: async (data: CreateListDto, userId: string): Promise<List> => {
+    createList: async (data: CreateListDto): Promise<List> => {
         try {
-            // TODO: Change to actual API endpoint
-            const res = await fetch(`/api/lists?userId=${userId}`, {
-                method: "POST",
+            const res = await axiosInstance.post<List>(`/lists`, data, {
                 headers: {
-                    "Content-Type": "application/json",
                     Authorization: `Bearer ${localStorage.getItem("jwt")}`,
                 },
-                body: JSON.stringify(data),
             });
-
-            if (!res.ok) {
-                const errorData = await res.json();
-                throw new Error(errorData.message || "Failed to create list");
-            }
-
-            return res.json();
+            return res.data;
         } catch (error) {
             console.error("Failed to create list:", error);
             throw error;
@@ -60,24 +44,14 @@ export const ListAPI = {
     },
 
     // Update a list
-    updateList: async (id: number, data: UpdateListDto, userId: string): Promise<List> => {
+    updateList: async (id: number, data: UpdateListDto): Promise<List> => {
         try {
-            // TODO: Change to actual API endpoint
-            const res = await fetch(`/api/lists/${id}?userId=${userId}`, {
-                method: "PUT",
+            const res = await axiosInstance.put<List>(`/lists/${id}`, data, {
                 headers: {
-                    "Content-Type": "application/json",
                     Authorization: `Bearer ${localStorage.getItem("jwt")}`,
                 },
-                body: JSON.stringify(data),
             });
-
-            if (!res.ok) {
-                const errorData = await res.json();
-                throw new Error(errorData.message || "Failed to update list");
-            }
-
-            return res.json();
+            return res.data;
         } catch (error) {
             console.error("Failed to update list:", error);
             throw error;
@@ -85,20 +59,13 @@ export const ListAPI = {
     },
 
     // Delete a list
-    deleteList: async (id: number, userId: string): Promise<void> => {
+    deleteList: async (id: string): Promise<void> => {
         try {
-            // TODO: Change to actual API endpoint
-            const res = await fetch(`/api/lists/${id}?userId=${userId}`, {
-                method: "DELETE",
+            await axiosInstance.delete(`/lists/${id}`, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem("jwt")}`,
                 },
             });
-
-            if (!res.ok) {
-                const errorData = await res.json();
-                throw new Error(errorData.message || "Failed to delete list");
-            }
         } catch (error) {
             console.error("Failed to delete list:", error);
             throw error;
@@ -106,24 +73,18 @@ export const ListAPI = {
     },
 
     // Reorder lists within a board
-    reorderLists: async (boardId: number, listIds: number[], userId: string): Promise<List[]> => {
+    reorderLists: async (boardId: string, listIds: number[]): Promise<List[]> => {
         try {
-            // TODO: Change to actual API endpoint
-            const res = await fetch(`/api/boards/${boardId}/lists/reorder?userId=${userId}`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+            const { data } = await axiosInstance.post<List[]>(
+                `/boards/${boardId}/lists/reorder`,
+                { listIds },
+                {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+                    },
                 },
-                body: JSON.stringify({ listIds }),
-            });
-
-            if (!res.ok) {
-                const errorData = await res.json();
-                throw new Error(errorData.message || "Failed to reorder lists");
-            }
-
-            return res.json();
+            );
+            return data;
         } catch (error) {
             console.error("Failed to reorder lists:", error);
             throw error;
