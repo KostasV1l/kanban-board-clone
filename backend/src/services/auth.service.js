@@ -23,7 +23,7 @@ const setTokenCookies = (res, accessToken, refreshToken) => {
     httpOnly: true,
     secure: process.env.NODE_ENV !== "development",
     sameSite: "strict",
-    maxAge: 1 * 60 * 1000, // 15 minutes
+    maxAge: 15 * 60 * 1000, // 15 minutes
   });
 
   const csrfToken = crypto.randomBytes(32).toString("hex");
