@@ -1,14 +1,13 @@
 import { useMutation } from "@tanstack/react-query";
-import { ListAPI, listKeys } from "../model";
 import { queryClient } from "@shared/api/query-client";
+import { List, ListAPI, listKeys } from "../model";
 
 // Delete a list
-export const useDeleteList = () => {
+export const useDeleteList = (boardId: string) => {
     return useMutation({
         mutationFn: (id: string) => ListAPI.deleteList(id),
-        onSuccess: (_, id) => {
-            // We don't know the boardId here, so we invalidate all lists
-            queryClient.invalidateQueries({ queryKey: listKeys.lists() });
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: listKeys.boardLists(boardId) });
         },
     });
 };

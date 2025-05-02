@@ -72,6 +72,15 @@ export const ListAPI = {
         }
     },
 
+    // deleteList: async (id: string): Promise<boolean> => {
+    //     return new Promise(resolve => {
+    //         setTimeout(() => {
+    //             console.log(`Simulated delete of list with id: ${id}`);
+    //             resolve(true);
+    //         }, 300); // simulate delay
+    //     });
+    // },
+
     // Reorder lists within a board
     reorderLists: async (boardId: string, listIds: number[]): Promise<List[]> => {
         try {

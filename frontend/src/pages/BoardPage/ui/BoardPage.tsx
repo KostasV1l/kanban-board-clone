@@ -1,5 +1,6 @@
 "use client";
 
+import { DndContext } from "@dnd-kit/core";
 import { useParams } from "next/navigation";
 import { useGetLists } from "@entities/list/hooks";
 import { List } from "@entities/list/model";
@@ -22,14 +23,16 @@ const BoardPage = () => {
     }
 
     return (
-        <div>
-            <div style={{ display: "flex", gap: "16px", overflowX: "auto" }}>
-                {dataLists.map((list: List) => (
-                    <ListColumn key={list.id} list={list} />
-                ))}
-                <NewListColumn currentLength={dataLists.length} boardId={id} />
+        <DndContext>
+            <div>
+                <div style={{ display: "flex", gap: "16px", overflowX: "auto" }}>
+                    {dataLists.map((list: List) => (
+                        <ListColumn key={list.id} list={list} />
+                    ))}
+                    <NewListColumn currentLength={dataLists.length} boardId={id} />
+                </div>
             </div>
-        </div>
+        </DndContext>
     );
 };
 

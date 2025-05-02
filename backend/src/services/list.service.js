@@ -52,32 +52,54 @@ class ListService extends BaseService {
   }
 
   async updateList(listId, data) {
-    if (!listId) throw new Error("List ID is required");
-    return await this.model.findByIdAndUpdate(listId, data, { new: true });
+    // if (!listId) throw new Error("List ID is required");
+    // return await this.model.findByIdAndUpdate(listId, data, { new: true });
+    if (!listId) throw new Error("list Id is required");
+
+    const session = await mongoose.startSession();
+
+    try {
+      session.startTransaction();
+
+      const updatedList = await List.findByIdAndUpdate(listId, data, {
+        new: true,
+        session,
+      });
+
+      if (!updatedList) throw new Error("List not found");
+
+      await session.commitTransaction();
+      return updatedList;
+    } catch (error) {
+      await session.abortTransaction();
+      throw error;
+    } finally {
+      session.endSession();
+    }
   }
 
   async deleteList(listId) {
     if (!listId) throw new Error("List ID is required");
-  
+
     const session = await mongoose.startSession();
-  
+
     try {
       session.startTransaction();
-  
-      // Find the list first to get the board ID
-      const list = await this.model.findById(listId).session(session);
+
+      // Find the list first to get the list ID
+      const list = await List.findById(listId).session(session);
       if (!list) throw new Error("List not found");
-  
+
       // Delete the list
-      await this.model.findByIdAndDelete(listId).session(session);
-  
+      await List.findByIdAndDelete(listId).session(session);
+
       // Remove list ID from Board.lists[]
       await Board.findByIdAndUpdate(
         list.board,
         { $pull: { lists: list._id } },
         { session }
       );
-  
+
       await session.commitTransaction();
       return list; // Optionally return the deleted list
     } catch (error) {

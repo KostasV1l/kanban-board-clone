@@ -10,8 +10,6 @@ exports.getLists = async (req, res, next) => {
     if (req.query.boardId) {
       lists = await listService.getListsByBoard(req.query.boardId);
     }
-
-    console.log(lists)
     res.status(200).json(lists);
   } catch (error) {
     next(error);
@@ -68,9 +66,14 @@ exports.updateList = async (req, res, next) => {
 // @route   DELETE /api/lists/:listId
 exports.deleteList = async (req, res, next) => {
   try {
-    const listId = req.params.listId;
-    await listService.deleteList(listId);
-    res.status(204).end();
+    const list = await listService.getListById(req.params.listId);
+
+    if (!list) {
+      return res.status(404).json({ message: "List not found" });
+    }
+
+    await listService.deleteList(req.params.listId);
+    res.status(204).send();
   } catch (error) {
     next(error);
   }

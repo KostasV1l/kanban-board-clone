@@ -15,6 +15,6 @@ router.get("/", protect, getLists);
 router.get("/:listId", protect, getList);
 router.post("/", protect, createList);
 router.put("/:listId", protect, updateList);
-router.delete("/lists/:listId", protect, deleteList);
+router.delete("/:listId", protect, deleteList);
 
 module.exports = router;
