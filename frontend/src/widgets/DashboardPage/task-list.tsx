@@ -15,6 +15,8 @@ export const TaskList = ({ tasks, onTaskClick }: TaskListProps) => {
     );
   }
 
+  console.log("tasks", tasks);
+
   return (
     <div className="space-y-3">
       {tasks.map((task) => (

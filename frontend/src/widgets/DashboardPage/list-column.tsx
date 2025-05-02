@@ -7,7 +7,7 @@ import { List } from "@/entities/list/model";
 import { useDeleteList } from "@entities/list/hooks";
 import { TaskList } from "./task-list";
 import { useGetTasksByList } from "@/entities/task/hooks/useGetTasksByList";
-import { TaskCreateForm } from "@features/task/ui/TaskCreateForm"; 
+import { TaskCreateForm } from "@features/task/ui/task-create"; 
 
 interface ListColumnProps {
     list: List;

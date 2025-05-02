@@ -16,14 +16,14 @@ const setTokenCookies = (res, accessToken, refreshToken) => {
     secure: process.env.NODE_ENV !== "development",
     sameSite: "strict", // means that the cookie is sent only to the same site it originated from
     maxAge: 7 * 24 * 60 * 60 * 1000,
-    path: "/api/auth", // This cookie will only be sent when making requests to '/api/auth' or its subdirectories
+    // path: "/api/auth", // This cookie will only be sent when making requests to '/api/auth' or its subdirectories
   });
 
   res.cookie("accessToken", accessToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV !== "development",
     sameSite: "strict",
-    maxAge: 15 * 60 * 1000, // 15 minutes
+    maxAge: 1 * 60 * 1000, // 15 minutes
   });
 
   const csrfToken = crypto.randomBytes(32).toString("hex");
