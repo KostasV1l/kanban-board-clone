@@ -11,7 +11,6 @@ exports.getLists = async (req, res, next) => {
       lists = await listService.getListsByBoard(req.query.boardId);
     }
 
-    console.log(lists)
     res.status(200).json(lists);
   } catch (error) {
     next(error);

@@ -1,9 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { Plus, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { List } from "@/entities/list/model";
 import { useDeleteList } from "@entities/list/hooks";
+import { TaskList } from "./task-list";
+import { useGetTasksByList } from "@/entities/task/hooks/useGetTasksByList";
+import { TaskCreateForm } from "@features/task/ui/TaskCreateForm"; 
 
 interface ListColumnProps {
     list: List;
@@ -11,6 +15,8 @@ interface ListColumnProps {
 
 export const ListColumn = ({ list }: ListColumnProps) => {
     const deleteList = useDeleteList();
+    const { data: tasks = [], isLoading } = useGetTasksByList(list.id);
+    const [isAddingTask, setIsAddingTask] = useState(false);
 
     const handleDelete = () => {
         const confirmed = confirm(`Are you sure you want to delete "${list.name}"?`);
@@ -30,18 +36,33 @@ export const ListColumn = ({ list }: ListColumnProps) => {
             </div>
 
             <div className="flex-1 overflow-auto p-3">
-                {/* <div className="space-y-3">
-          {list.task.map((task) => (
-            <Task key={task.id} task={task} onDragStart={(e) => onDragStart(e, task.id, column.id)} />
-          ))}
-        </div> */}
+                {isLoading ? (
+                    <div className="flex justify-center items-center py-4">
+                        <span className="text-sm text-muted-foreground">Loading tasks...</span>
+                    </div>
+                ) : (
+                    <TaskList tasks={tasks} />
+                )}
             </div>
 
             <div className="border-t p-3">
-                <Button variant="ghost" className="w-full justify-start" size="sm">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Task
-                </Button>
+                {isAddingTask ? (
+                    <TaskCreateForm 
+                        listId={list.id}
+                        boardId={list.board}
+                        onCancel={() => setIsAddingTask(false)}
+                    />
+                ) : (
+                    <Button 
+                        variant="ghost" 
+                        className="w-full justify-start" 
+                        size="sm"
+                        onClick={() => setIsAddingTask(true)}
+                    >
+                        <Plus className="mr-2 h-4 w-4" />
+                        Add Task
+                    </Button>
+                )}
             </div>
         </div>
     );
