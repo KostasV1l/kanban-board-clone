@@ -1,8 +1,9 @@
+import { BaseEntity } from "@shared/model/BaseEntity";
+
 export type TaskPriority = "low" | "medium" | "high";
 export type TaskStatus = "todo" | "in-progress" | "completed";
 
-export interface Task {
-    id: number;
+export interface ITask extends BaseEntity {
     title: string;
     description?: string;
     boardId: number;
@@ -20,6 +21,4 @@ export interface Task {
         id: number;
         name: string;
     };
-    createdAt: string;
-    updatedAt: string;
 }

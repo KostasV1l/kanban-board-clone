@@ -4,6 +4,8 @@ import { Plus, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { List } from "@/entities/list/model";
 import { useDeleteList } from "@entities/list/hooks";
+import { TaskList } from "./task-list";
+import { useGetTasksByList } from "@/entities/task/hooks/useGetTasksByList";
 
 interface ListColumnProps {
     list: List;
@@ -11,6 +13,7 @@ interface ListColumnProps {
 
 export const ListColumn = ({ list }: ListColumnProps) => {
     const deleteList = useDeleteList();
+    const { data: tasks = [], isLoading } = useGetTasksByList(list.id);
 
     const handleDelete = () => {
         const confirmed = confirm(`Are you sure you want to delete "${list.name}"?`);
@@ -30,11 +33,13 @@ export const ListColumn = ({ list }: ListColumnProps) => {
             </div>
 
             <div className="flex-1 overflow-auto p-3">
-                {/* <div className="space-y-3">
-          {list.task.map((task) => (
-            <Task key={task.id} task={task} onDragStart={(e) => onDragStart(e, task.id, column.id)} />
-          ))}
-        </div> */}
+                {isLoading ? (
+                    <div className="flex justify-center items-center py-4">
+                        <span className="text-sm text-muted-foreground">Loading tasks...</span>
+                    </div>
+                ) : (
+                    <TaskList tasks={tasks} />
+                )}
             </div>
 
             <div className="border-t p-3">
