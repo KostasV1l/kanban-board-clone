@@ -9,10 +9,15 @@ export const useLogout = () => {
     return useMutation({
         mutationFn: () => AuthAPI.logout(),
         onSuccess: () => {
+            localStorage.removeItem("auth_token_timestamp");
             queryClient.invalidateQueries({ queryKey: authKeys.currentUser() });
             console.log("Logged out");
             router.push("/");
-
+        },
+        onError: error => {
+            console.error("Logout failed:", error);
+            localStorage.removeItem("auth_token_timestamp");
+            window.location.href = "/";
         },
     });
 };
