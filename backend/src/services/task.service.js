@@ -39,6 +39,17 @@ class TaskService extends BaseService {
       // ensures that all ops either succeed or fail
       session.startTransaction();
 
+      // -1 means "highest to lowest
+      // Find the highest order in the current list
+      const highestOrderTask = await this.model.findOne(
+        { list: data.list },
+        { order: 1 },
+        { sort: { order: -1 } }
+      ).session(session);
+
+      // Set order to be one more than the highest, or 0 if no tasks exist
+      data.order = highestOrderTask ? highestOrderTask.order + 1 : 0;
+
       // In Mongoose's transaction API, the create() method requires documents to be passed as an array
       // session contains the MongoDB session object that links all operations in the transaction together
       const task = await this.model.create([data], { session });

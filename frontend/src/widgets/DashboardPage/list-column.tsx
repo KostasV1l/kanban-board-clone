@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Plus, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { List } from "@/entities/list/model";

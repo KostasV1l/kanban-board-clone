@@ -1,25 +1,24 @@
+import { BaseEntity } from "@shared/model/BaseEntity";
+
 export type TaskPriority = "low" | "medium" | "high";
 export type TaskStatus = "todo" | "in-progress" | "completed";
 
-export interface Task {
-    id: number;
+export interface ITask extends BaseEntity {
     title: string;
     description?: string;
-    boardId: number;
-    listId: number;
-    order: number;
+    boardId: string;
+    listId: string;
+    order?: number;
     status?: TaskStatus;
     priority: TaskPriority;
     dueDate?: string;
     assignedTo?: {
-        id: number;
+        id: string;
         name: string;
         avatar?: string;
     };
     createdBy?: {
-        id: number;
+        id: string;
         name: string;
     };
-    createdAt: string;
-    updatedAt: string;
 }
