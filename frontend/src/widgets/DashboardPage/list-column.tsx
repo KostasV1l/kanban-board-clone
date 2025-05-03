@@ -14,10 +14,12 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { List } from "@/entities/list/model";
 import { Input } from "@/components/ui/input";
+import { List } from "@/entities/list/model";
 import { useDeleteList, useUpdateList } from "@entities/list/hooks";
+import { useGetTasksByList } from "@entities/task";
 import { TaskCreateForm } from "@features/task";
+import { TaskList } from "./task-list";
 
 interface ListColumnProps {
     list: List;
@@ -30,20 +32,21 @@ export const ListColumn = ({ list }: ListColumnProps) => {
     const [isEditing, setIsEditing] = useState(false);
     const [isAddingTask, setIsAddingTask] = useState(false);
     const [name, setName] = useState(list.name);
+    const { data: tasks = [], isLoading } = useGetTasksByList(list.id);
 
     const handleDelete = () => {
         deleteListMutation.mutate(list.id);
     };
 
     const handleNameUpdate = () => {
-      if (name.trim() && name !== list.name) {
-          updateList.mutate({
-              id: list.id,
-              data: { name },
-          });
-      }
-      setIsEditing(false);
-  };
+        if (name.trim() && name !== list.name) {
+            updateList.mutate({
+                id: list.id,
+                data: { name },
+            });
+        }
+        setIsEditing(false);
+    };
 
     return (
         <div className="flex h-full min-w-[250px] flex-col rounded-lg border bg-card">
@@ -52,9 +55,9 @@ export const ListColumn = ({ list }: ListColumnProps) => {
                     {isEditing ? (
                         <Input
                             value={name}
-                            onChange={(e) => setName(e.target.value)}
+                            onChange={e => setName(e.target.value)}
                             onBlur={handleNameUpdate}
-                            onKeyDown={(e) => e.key === "Enter" && handleNameUpdate()}
+                            onKeyDown={e => e.key === "Enter" && handleNameUpdate()}
                             className="text-sm"
                             autoFocus
                         />
@@ -103,7 +106,15 @@ export const ListColumn = ({ list }: ListColumnProps) => {
                 </AlertDialog>
             </div>
 
-            <div className="flex-1 overflow-auto p-3">{/* Tasks will go here */}</div>
+            <div className="flex-1 overflow-auto p-3">
+                {isLoading ? (
+                    <div className="flex justify-center items-center py-4">
+                        <span className="text-sm text-muted-foreground">Loading tasks...</span>
+                    </div>
+                ) : (
+                    <TaskList tasks={tasks} />
+                )}
+            </div>
 
             <div className="border-t p-3">
                 {isAddingTask ? (
