@@ -11,6 +11,22 @@ const axiosInstance = axios.create({
     },
 });
 
+// Local helper function to refresh token
+const refreshToken = async (): Promise<boolean> => {
+    try {
+        const { data } = await axiosInstance.post("/auth/refresh");
+        
+        if (data?.csrfToken) {
+            Cookies.set("csrf-token", data.csrfToken);
+        }
+        
+        return true;
+    } catch (error) {
+        console.error("Token refresh failed in interceptor helper:", error);
+        return false;
+    }
+};
+
 axiosInstance.interceptors.request.use(
     config => {
         const csrfToken = Cookies.get("csrf-token");
@@ -38,12 +54,20 @@ axiosInstance.interceptors.response.use(
 
             try {
                 // Try to refresh the token
-                await axiosInstance.post("/auth/refresh");
-
-                // Retry the original request
-                return axiosInstance(originalRequest);
+                const success = await refreshToken();
+                
+                if (success) {
+                    // Retry the original request
+                    return axiosInstance(originalRequest);
+                } else {
+                    // Refresh failed, redirect to login
+                    console.warn("Token refresh failed in interceptor");
+                    window.location.href = "/";
+                    return Promise.reject(new Error("Session expired"));
+                }
             } catch (refreshError) {
                 // Refresh token failed, redirect to login
+                console.error("Token refresh error in interceptor:", refreshError);
                 window.location.href = "/";
                 return Promise.reject(refreshError);
             }

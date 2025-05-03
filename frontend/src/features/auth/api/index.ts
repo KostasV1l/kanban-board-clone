@@ -39,8 +39,12 @@ export const AuthAPI = {
         try {
             const { data } = await axiosInstance.get<AuthResponse>("/auth/me");
             return data.user || null;
-        } catch (error) {
-            console.error("Failed to get current user");
+        } catch (error: any) {
+            // Ensure 401 errors propagate to axios interceptor
+            if (error?.response?.status === 401) {
+                throw error;
+            }
+            console.error("Failed to get current user:", error);
             return null;
         }
     },
@@ -49,6 +53,7 @@ export const AuthAPI = {
         try {
             await axiosInstance.post("/auth/logout");
             Cookies.remove("csrf-token");
+            Cookies.remove("refresh-token");
         } catch (error) {
             console.error("Logout failed:", error);
         }

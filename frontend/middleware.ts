@@ -10,14 +10,18 @@ const DASHBOARD_ROUTE = "/dashboard";
 
 export function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
-    const token = request.cookies.get("accessToken")?.value;
+    const accessToken = request.cookies.get("accessToken")?.value;
+    const refreshToken = request.cookies.get("refreshToken")?.value;
     const isPublic = PUBLIC_ROUTES.includes(pathname);
 
-    if (!token && !isPublic) {
+    // Redirect to login if neither token exists and trying to access protected route
+    if (!accessToken && !refreshToken && !isPublic) {
         return NextResponse.redirect(new URL("/", request.url));
     }
 
-    if (token && isPublic) {
+    // Redirect to dashboard if access token exists and trying to access public route
+    if (accessToken && isPublic) {
+        console.log("redirecting to dashboard");
         return NextResponse.redirect(new URL(DASHBOARD_ROUTE, request.url));
     }
 

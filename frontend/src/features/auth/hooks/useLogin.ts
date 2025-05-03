@@ -11,6 +11,8 @@ export const useLogin = () => {
     return useMutation({
         mutationFn: (data: LoginFormData) => AuthAPI.login(data),
         onSuccess: data => {
+            // Record token timestamp for fresh token tracking
+            localStorage.setItem('auth_token_timestamp', Date.now().toString());
             queryClient.setQueryData(authKeys.currentUser(), data.user);
             router.push("/dashboard");
         },
