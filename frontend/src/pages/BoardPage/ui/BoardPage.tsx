@@ -1,5 +1,8 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { DndContext, DragEndEvent, useDraggable } from "@dnd-kit/core";
+import { arrayMove } from "@dnd-kit/sortable";
 import { useParams } from "next/navigation";
 import { useGetLists } from "@entities/list/hooks";
 import { List } from "@entities/list/model";
@@ -22,14 +25,18 @@ const BoardPage = () => {
     }
 
     return (
-        <div>
-            <div style={{ display: "flex", gap: "16px", overflowX: "auto" }}>
-                {dataLists.map((list: List) => (
-                    <ListColumn key={list.id} list={list} />
-                ))}
-                <NewListColumn currentLength={dataLists.length} boardId={id} />
+        <DndContext>
+            <div>
+                <div
+                    style={{ display: "flex", gap: "16px", overflowX: "auto" }}
+                >
+                    {dataLists.map((list: List) => (
+                        <ListColumn key={list.id} list={list} />
+                    ))}
+                    <NewListColumn currentLength={dataLists.length} boardId={id} />
+                </div>
             </div>
-        </div>
+        </DndContext>
     );
 };
 
