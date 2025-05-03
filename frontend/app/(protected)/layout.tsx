@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { Header } from "@/components/ui/header";
 import { useRouter } from "next/navigation";
 import { useAuthStatus } from "@features/auth/hooks/useAuthStatus";
+import { AuthProvider } from "@/features/auth/providers/AuthProvider";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
     const { isAuthenticated, isLoading } = useAuthStatus();
@@ -20,9 +21,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     }
 
     return (
-        <div className="w-full flex-grow flex flex-col">
-            <Header />
-            <main className="w-11/12 my-4 mx-auto flex-grow">{children}</main>
-        </div>
+        <AuthProvider>
+            <div className="w-full flex-grow flex flex-col">
+                <Header />
+                <main className="w-11/12 my-4 mx-auto flex-grow">{children}</main>
+            </div>
+        </AuthProvider>
     );
 }
