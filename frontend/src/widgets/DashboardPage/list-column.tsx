@@ -15,8 +15,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { List } from "@/entities/list/model";
-import { useDeleteList } from "@entities/list/hooks";
-// Adjust path if needed
+import { Input } from "@/components/ui/input";
+import { useDeleteList, useUpdateList } from "@entities/list/hooks";
 import { TaskCreateForm } from "@features/task";
 
 interface ListColumnProps {
@@ -25,17 +25,49 @@ interface ListColumnProps {
 
 export const ListColumn = ({ list }: ListColumnProps) => {
     const deleteListMutation = useDeleteList(list.board);
+    const updateList = useUpdateList();
 
+    const [isEditing, setIsEditing] = useState(false);
     const [isAddingTask, setIsAddingTask] = useState(false);
+    const [name, setName] = useState(list.name);
 
     const handleDelete = () => {
         deleteListMutation.mutate(list.id);
     };
 
+    const handleNameUpdate = () => {
+      if (name.trim() && name !== list.name) {
+          updateList.mutate({
+              id: list.id,
+              data: { name },
+          });
+      }
+      setIsEditing(false);
+  };
+
     return (
         <div className="flex h-full min-w-[250px] flex-col rounded-lg border bg-card">
-            <div className="flex items-center justify-between border-b p-3">
-                <h3 className="font-medium">{list.name}</h3>
+            <div className="flex items-center justify-between border-b p-3 gap-2">
+                <div className="flex-1">
+                    {isEditing ? (
+                        <Input
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            onBlur={handleNameUpdate}
+                            onKeyDown={(e) => e.key === "Enter" && handleNameUpdate()}
+                            className="text-sm"
+                            autoFocus
+                        />
+                    ) : (
+                        <h3
+                            className="font-medium text-sm cursor-pointer"
+                            onClick={() => setIsEditing(true)}
+                            title="Click to edit name"
+                        >
+                            {list.name}
+                        </h3>
+                    )}
+                </div>
                 <span className="rounded-full bg-primary/10 px-2 py-1 text-xs font-medium">{list.tasksCount}</span>
                 <AlertDialog>
                     <AlertDialogTrigger asChild>

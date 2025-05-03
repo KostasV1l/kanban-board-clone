@@ -52,8 +52,7 @@ class ListService extends BaseService {
   }
 
   async updateList(listId, data) {
-    // if (!listId) throw new Error("List ID is required");
-    // return await this.model.findByIdAndUpdate(listId, data, { new: true });
+    
     if (!listId) throw new Error("list Id is required");
 
     const session = await mongoose.startSession();

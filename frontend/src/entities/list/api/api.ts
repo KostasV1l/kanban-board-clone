@@ -44,7 +44,7 @@ export const ListAPI = {
     },
 
     // Update a list
-    updateList: async (id: number, data: UpdateListDto): Promise<List> => {
+    updateList: async (id: string, data: UpdateListDto): Promise<List> => {
         try {
             const res = await axiosInstance.put<List>(`/lists/${id}`, data, {
                 headers: {
