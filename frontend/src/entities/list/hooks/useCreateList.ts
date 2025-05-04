@@ -6,9 +6,9 @@ import { queryClient } from "@shared/api/query-client";
 export const useCreateList = () => {
 
     return useMutation({
-        mutationFn: (data: CreateListDto) => ListAPI.createList(data),
+        mutationFn: ({ boardId, data }: { boardId: string, data: CreateListDto }) => ListAPI.createList(boardId, data),
         onSuccess: data => {
-            queryClient.invalidateQueries({ queryKey: listKeys.boardLists(data.board) });
+            queryClient.invalidateQueries({ queryKey: listKeys.boardLists(data.boardId) });
         },
     });
 };

@@ -1,7 +1,7 @@
 export interface List {
     id: string;
     name: string;
-    board: string;
+    boardId: string;
     order: number; // For list ordering within a board
     color?: string; // Optional color for the list header
     tasksCount?: number; // Optional count of tasks in this list
@@ -11,7 +11,6 @@ export interface List {
 
 export interface CreateListDto {
     name: string;
-    board: string;
     order: number;
     color?: string;
 }
