@@ -8,13 +8,6 @@ const ListSchema = new mongoose.Schema(
       required: [true, "List name is required"],
       trim: true,
     },
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    },
-    guestId: {
-      type: String,
-    },
     description: {
       type: String,
       trim: true,
@@ -43,8 +36,9 @@ const ListSchema = new mongoose.Schema(
 );
 
 // Indexes for faster queries
-ListSchema.index({ user: 1 });
-ListSchema.index({ guestId: 1 });
+ListSchema.index({ board: 1 });
+ListSchema.index({ board: 1, order: 1 });
+
 
 const List = mongoose.model("List", ListSchema);
 module.exports = List;
