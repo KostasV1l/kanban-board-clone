@@ -1,33 +1,66 @@
 const BaseService = require("./base.service");
 const Board = require("../models/board.model");
 const Task = require("../models/task.model");
+const BoardMember = require("../models/boardMember.model");
+const List = require("../models/list.model");
 
 class BoardService extends BaseService {
   constructor() {
     super(Board);
   }
 
-  async getBoardsWithTaskCounts(query) {
-    const boards = await this.model.find(query);
+  async getBoardsByUser(userId, role = null) {
+    try {
+      const query = { user: userId };
+      if (role) {
+        query.role = role;
+      }
 
-    // Get task counts for each board
-    const boardsWithCounts = await Promise.all(
-      boards.map(async (board) => {
-        const tasksCount = await Task.countDocuments({ board: board._id });
-        return {
-          ...board.toObject(),
-          tasksCount,
-        };
-      })
-    );
+      console.log("query", query);
 
-    return boardsWithCounts;
-  }
+      const memberships = await BoardMember.find(query).lean();
 
-  async getBoardsByUser(userId) {
-    if (!userId) throw new Error("User ID is required");
-    console.log("userId", userId);
-    return await this.getBoardsWithTaskCounts({ user: userId });
+      const boardIds = memberships.map((member) => member.board);
+
+      if (boardIds.length === 0) {
+        return [];
+      }
+
+      const boards = await this.model.find({ _id: { $in: boardIds } }).lean();
+
+      const boardRoleMap = {};
+
+      memberships.forEach((membership) => {
+        boardRoleMap[membership.board.toString()] = membership.role;
+      });
+
+      const boardsWithDetails = await Promise.all(
+        boards.map(async (board) => {
+          const lists = await List.find({ board: board._id }).lean();
+
+          const listIds = lists.map((list) => list._id);
+
+          const tasksCount = await Task.countDocuments({
+            list: { $in: listIds },
+          });
+
+          const { _id, ...boardData } = board;
+          return {
+            ...boardData,
+            id: _id.toString(),
+            userRole: boardRoleMap[board._id],
+            tasksCount,
+          };
+        })
+      );
+
+      console.log("boardsWithDetails", boardsWithDetails);
+
+      return boardsWithDetails;
+    } catch (error) {
+      console.error("Error fetching boards by user:", error);
+      throw error;
+    }
   }
 
   async getBoardsByGuest(guestId) {

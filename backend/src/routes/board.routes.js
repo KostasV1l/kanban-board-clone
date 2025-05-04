@@ -9,6 +9,10 @@ const {
     deleteBoard,
 } = require("../controllers/board.controller");
 const { protect } = require("../middleware/auth.middleware");
+const { checkBoardMembership } = require("../middleware/boardAuth.middleware");
+const memberRoutes = require("./member.routes");
+const listRoutes = require("./list.routes");
+const { ROLES } = require("../config/constants");
 
 const router = express.Router();
 
@@ -21,8 +25,13 @@ router.get("/guest/:guestId", getGuestBoards);
 router.post("/guest/:guestId", createGuestBoard);
 
 // Protected board-specific routes
-router.get("/:boardId", protect, getBoard);
-router.put("/:boardId", protect, updateBoard);
-router.delete("/:boardId", protect, deleteBoard);
+router.get("/:boardId", protect, checkBoardMembership(ROLES.VIEWER), getBoard);
+router.put("/:boardId", protect, checkBoardMembership(ROLES.EDITOR), updateBoard);
+router.delete("/:boardId", protect, checkBoardMembership(ROLES.OWNER), deleteBoard);
+
+// Mount member routes under /:boardId/members
+router.use("/:boardId/members", memberRoutes);
+
+router.use("/:boardId/lists", listRoutes);
 
 module.exports = router;
