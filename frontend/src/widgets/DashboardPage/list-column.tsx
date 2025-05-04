@@ -16,6 +16,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { List } from "@/entities/list/model";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { useDeleteList, useUpdateList } from "@entities/list/hooks";
 import { useGetTasksByList } from "@entities/task";
 import { TaskCreateForm } from "@features/task";
@@ -28,6 +30,9 @@ interface ListColumnProps {
 export const ListColumn = ({ list }: ListColumnProps) => {
     const deleteListMutation = useDeleteList(list.board);
     const updateList = useUpdateList();
+
+    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: list.id });
+    const style = { transform: CSS.Transform.toString(transform), transition };
 
     const [isEditing, setIsEditing] = useState(false);
     const [isAddingTask, setIsAddingTask] = useState(false);
@@ -49,7 +54,13 @@ export const ListColumn = ({ list }: ListColumnProps) => {
     };
 
     return (
-        <div className="flex h-full min-w-[250px] flex-col rounded-lg border bg-card">
+        <div
+            ref={setNodeRef}
+            style={style}
+            {...attributes}
+            {...listeners}
+            className="flex h-full min-w-[250px] flex-col rounded-lg border bg-card"
+        >
             <div className="flex items-center justify-between border-b p-3 gap-2">
                 <div className="flex-1">
                     {isEditing ? (
