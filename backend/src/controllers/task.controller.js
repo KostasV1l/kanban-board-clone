@@ -1,3 +1,4 @@
+const { TASK_STATUS, TASK_PRIORITY } = require("../config/constants");
 const taskService = require("../services/task.service");
 
 // @desc    Get all tasks from a list
@@ -61,21 +62,43 @@ exports.getTask = async (req, res, next) => {
 // @route   POST /api/tasks
 exports.createTask = async (req, res, next) => {
   try {
-    const { title, listId, boardId } = req.body;
+    const { boardId, listId } = req.params;
 
-    // Validation
-    if (!title || !listId || !boardId) {
+    const { title, description, status, priority, dueDate, assignedTo } =
+      req.body;
+
+    if (!title || typeof title !== "string" || !title.trim()) {
       return res.status(400).json({
-        message: "Title, listId, and boardId are required fields.",
+        message: "Task title is required and must be a non-empty string",
       });
     }
 
-    req.body.list = listId;
-    req.body.board = boardId;
-    req.body.createdBy = req.user.id;
+    if (status && !Object.values(TASK_STATUS).includes(status)) {
+      return res.status(400).json({
+        message: "Invalid status",
+      });
+    }
+
+    if (priority && !Object.values(TASK_PRIORITY).includes(priority)) {
+      return res.status(400).json({
+        message: "Invalid priority",
+      });
+    }
+
+    const taskData = {
+      title,
+      description,
+      status,
+      priority: priority || TASK_PRIORITY.MEDIUM,
+      dueDate,
+      assignedTo,
+      createdBy: req.user.id,
+      board: boardId,
+      list: listId,
+    };
 
     // Create the task
-    const task = await taskService.createTask(req.body);
+    const task = await taskService.createTask(taskData);
 
     const responseTask = {
       id: task.id,

@@ -7,14 +7,18 @@ const {
   deleteList,
 } = require("../controllers/list.controller");
 const { protect } = require("../middleware/auth.middleware");
+const { checkBoardMembership } = require("../middleware/boardAuth.middleware");
+const { ROLES } = require("../config/constants");
+const taskRoutes = require("./task.routes");
 
-const router = express.Router();
+const router = express.Router({mergeParams: true});
 
 // list of endpoints
-router.get("/", protect, getLists);
-router.get("/:listId", protect, getList);
-router.post("/", protect, createList);
-router.put("/:listId", protect, updateList);
-router.delete("/:listId", protect, deleteList);
+router.get("/", protect, checkBoardMembership(ROLES.VIEWER), getLists);
+router.get("/:listId", protect, checkBoardMembership(ROLES.VIEWER), getList);
+router.post("/", protect, checkBoardMembership(ROLES.EDITOR), createList);
+router.put("/:listId", protect, checkBoardMembership(ROLES.EDITOR), updateList);
+router.delete("/:listId", protect, checkBoardMembership(ROLES.OWNER), deleteList);
+router.use("/:listId/tasks", taskRoutes);
 
 module.exports = router;

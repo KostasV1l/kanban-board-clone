@@ -1,15 +1,14 @@
 const listService = require("../services/list.service");
 
 // @desc    Get all lists from the board
-// @route   Get /api/boardId1/lists
+// @route   Get /api/boards/:boardId/lists
 
 exports.getLists = async (req, res, next) => {
   try {
-    let lists;
+    const boardId = req.params.boardId;
 
-    if (req.query.boardId) {
-      lists = await listService.getListsByBoard(req.query.boardId);
-    }
+    const lists = await listService.getListsByBoard(boardId);
+
     res.status(200).json(lists);
   } catch (error) {
     next(error);
@@ -17,7 +16,7 @@ exports.getLists = async (req, res, next) => {
 };
 
 // @desc    Get a single list by ID
-// @route   GET /api/lists/:listId
+// @route   GET /api/boards/:boardId/lists/:listId
 exports.getList = async (req, res, next) => {
   try {
     const list = await listService.getListById(req.params.listId);
@@ -28,18 +27,22 @@ exports.getList = async (req, res, next) => {
 };
 
 // @desc    Create a new list
-// @route   POST /api/lists
+// @route   POST /api/boards/:boardId/lists
 exports.createList = async (req, res, next) => {
   try {
-    const { name, board, order } = req.body;
+    const boardId = req.params.boardId;
+
+    const { name, order } = req.body;
 
     if (!name || typeof name !== "string" || !name.trim()) {
       return res.status(400).json({ message: "Name is required" });
     }
 
-    if (!board || order === undefined) {
+    if (order === undefined) {
       return res.status(400).json({ message: "Board and order are required" });
     }
+
+    req.body.board = boardId;
 
     const newList = await listService.createList(req.body);
     res.status(201).json(newList);
@@ -49,7 +52,7 @@ exports.createList = async (req, res, next) => {
 };
 
 // @desc    Update an existing list
-// @route   PUT /api/lists/:listId
+// @route   PUT /api/boards/:boardId/lists/:listId
 exports.updateList = async (req, res, next) => {
   try {
     const updatedList = await listService.updateList(
@@ -63,7 +66,7 @@ exports.updateList = async (req, res, next) => {
 };
 
 // @desc    Delete a list
-// @route   DELETE /api/lists/:listId
+// @route   DELETE /api/boards/:boardId/lists/:listId
 exports.deleteList = async (req, res, next) => {
   try {
     const list = await listService.getListById(req.params.listId);
@@ -72,8 +75,8 @@ exports.deleteList = async (req, res, next) => {
       return res.status(404).json({ message: "List not found" });
     }
 
-    await listService.deleteList(req.params.listId);
-    res.status(204).send();
+    const deletedList = await listService.deleteList(req.params.listId);
+    res.status(200).json(deletedList);
   } catch (error) {
     next(error);
   }
