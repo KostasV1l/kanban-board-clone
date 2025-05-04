@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { DndContext, DragEndEvent, useDraggable } from "@dnd-kit/core";
-import { arrayMove } from "@dnd-kit/sortable";
+import { DndContext, DragEndEvent } from "@dnd-kit/core";
+import { arrayMove, horizontalListSortingStrategy, SortableContext } from "@dnd-kit/sortable";
 import { useParams } from "next/navigation";
-import { useGetLists } from "@entities/list/hooks";
+import { useGetLists, useReorderLists } from "@entities/list/hooks";
 import { List } from "@entities/list/model";
 import { ListColumn } from "@widgets/DashboardPage/list-column";
 import { NewListColumn } from "@widgets/DashboardPage/new-column";
@@ -16,6 +16,27 @@ const BoardPage = () => {
 
     const { data: dataLists = [], isLoading, error } = useGetLists(id);
 
+    const reorderLists = useReorderLists();
+
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event;
+    
+        if (!over || active.id === over.id) return;
+    
+        const oldIndex = dataLists.findIndex(list => list.id === active.id);
+        const newIndex = dataLists.findIndex(list => list.id === over.id);
+    
+        const reordered = arrayMove(dataLists, oldIndex, newIndex).map((list, index) => ({
+            id: list.id,
+            order: index,
+        }));
+    
+        reorderLists.mutate({
+            boardId: id,
+            listUpdates: reordered,
+        });
+    };
+
     if (isLoading) {
         return <div>Loading....</div>;
     }
@@ -25,17 +46,15 @@ const BoardPage = () => {
     }
 
     return (
-        <DndContext>
-            <div>
-                <div
-                    style={{ display: "flex", gap: "16px", overflowX: "auto" }}
-                >
+        <DndContext onDragEnd={handleDragEnd}>
+            <SortableContext items={dataLists.map(list => list.id)} strategy={horizontalListSortingStrategy}>
+                <div style={{ display: "flex", gap: "16px", overflowX: "auto" }}>
                     {dataLists.map((list: List) => (
                         <ListColumn key={list.id} list={list} />
                     ))}
                     <NewListColumn currentLength={dataLists.length} boardId={id} />
                 </div>
-            </div>
+            </SortableContext>
         </DndContext>
     );
 };

@@ -52,7 +52,6 @@ class ListService extends BaseService {
   }
 
   async updateList(listId, data) {
-    
     if (!listId) throw new Error("list Id is required");
 
     const session = await mongoose.startSession();
@@ -104,6 +103,36 @@ class ListService extends BaseService {
     } catch (error) {
       await session.abortTransaction();
       throw error;
+    } finally {
+      session.endSession();
+    }
+  }
+
+  async reorderLists(boardId, listsIds) {
+    if (!boardId || !Array.isArray(listsIds)) throw new Error("Invalid input");
+
+    const session = await mongoose.startSession();
+
+    try {
+      session.startTransaction();
+
+      const updatedLists = [];
+
+      for (let i = 0; i < listsIds.length; i++) {
+        const listId = listsIds[i];
+        const updated = await List.findByIdAndUpdate(
+          listId,
+          { order: i },
+          { new: true, session }
+        );
+        updatedLists.push(updated);
+      }
+
+      await session.commitTransaction();
+      return updatedLists;
+    } catch (err) {
+      await session.abortTransaction();
+      throw err;
     } finally {
       session.endSession();
     }

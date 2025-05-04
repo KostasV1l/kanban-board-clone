@@ -1,3 +1,4 @@
+const List = require("../models/list.model");
 const listService = require("../services/list.service");
 
 // @desc    Get all lists from the board
@@ -74,6 +75,26 @@ exports.deleteList = async (req, res, next) => {
 
     await listService.deleteList(req.params.listId);
     res.status(204).send();
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.reorderLists = async (req, res, next) => {
+  try {
+    const { listUpdates } = req.body;
+
+    if (!Array.isArray(listUpdates)) {
+      return res.status(400).json({ message: "listUpdates must be an array" });
+    }
+
+    const updates = listUpdates.map(({ id, order }) =>
+      List.findByIdAndUpdate(id, { order })
+    );
+
+    await Promise.all(updates);
+
+    res.status(200).json({ message: "Lists reordered" });
   } catch (error) {
     next(error);
   }

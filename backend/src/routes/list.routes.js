@@ -5,6 +5,7 @@ const {
   createList,
   updateList,
   deleteList,
+  reorderLists
 } = require("../controllers/list.controller");
 const { protect } = require("../middleware/auth.middleware");
 
@@ -16,5 +17,6 @@ router.get("/:listId", protect, getList);
 router.post("/", protect, createList);
 router.put("/:listId", protect, updateList);
 router.delete("/:listId", protect, deleteList);
+router.post("/boards/:boardId/reorder", protect, reorderLists);
 
 module.exports = router;

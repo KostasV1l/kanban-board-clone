@@ -72,28 +72,10 @@ export const ListAPI = {
         }
     },
 
-    // deleteList: async (id: string): Promise<boolean> => {
-    //     return new Promise(resolve => {
-    //         setTimeout(() => {
-    //             console.log(`Simulated delete of list with id: ${id}`);
-    //             resolve(true);
-    //         }, 300); // simulate delay
-    //     });
-    // },
-
     // Reorder lists within a board
-    reorderLists: async (boardId: string, listIds: number[]): Promise<List[]> => {
+    reorderLists: async (boardId: string, listUpdates: { id: string; order: number }[]): Promise<void> => {
         try {
-            const { data } = await axiosInstance.post<List[]>(
-                `/boards/${boardId}/lists/reorder`,
-                { listIds },
-                {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem("jwt")}`,
-                    },
-                },
-            );
-            return data;
+            await axiosInstance.post(`/lists/boards/${boardId}/reorder`, { listUpdates });
         } catch (error) {
             console.error("Failed to reorder lists:", error);
             throw error;
