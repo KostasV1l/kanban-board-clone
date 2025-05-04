@@ -27,13 +27,12 @@ export const TaskCreateForm = ({ listId, boardId, onCancel }: TaskCreateFormProp
       title: title.trim(),
       listId: listId,
       boardId: boardId,
-      priority: "medium" as TaskPriority,
-      status: "todo",
+      priority: "MEDIUM" as TaskPriority,
     };
     
     console.log("Submitting task:", newTask);
     
-    createTask.mutate(newTask as ITask);
+    createTask.mutate({ boardId: boardId, listId: listId, task: newTask as ITask });
     
     // Instead, reset form state here directly
     setTitle("");

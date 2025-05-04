@@ -12,11 +12,11 @@ export const TaskCard = ({ task, onClick }: TaskCardProps) => {
   // Get color based on priority
   const getPriorityColor = () => {
     switch (task.priority) {
-      case "high":
+      case "HIGH":
         return "bg-red-100 text-red-800";
-      case "medium":
+      case "MEDIUM":
         return "bg-yellow-100 text-yellow-800";
-      case "low":
+      case "LOW":
         return "bg-green-100 text-green-800";
       default:
         return "bg-gray-100 text-gray-800";
@@ -28,7 +28,7 @@ export const TaskCard = ({ task, onClick }: TaskCardProps) => {
       className="rounded-md border bg-card p-3 shadow-sm hover:shadow-md transition-shadow cursor-pointer relative group"
       onClick={() => onClick?.(task)}
     >
-      <CardOptionsButton taskId={task.id} listId={task.listId} />
+      <CardOptionsButton taskId={task.id} listId={task.listId} boardId={task.boardId} />
       
       <h3 className="font-medium text-sm">{task.title}</h3>
       
