@@ -6,7 +6,7 @@ exports.getMembers = async (req, res) => {
   try {
     const members = await BoardMember.find({ board: boardId }).populate(
       "user",
-      "id, username, email"
+      "id username email"
     );
 
     res.status(200).json(members);
