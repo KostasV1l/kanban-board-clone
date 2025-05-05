@@ -65,11 +65,6 @@ export const ListAPI = {
             const { data } = await axiosInstance.post<List[]>(
                 `/boards/${boardId}/lists/reorder`,
                 { listIds },
-                {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem("jwt")}`,
-                    },
-                },
             );
             return data;
         } catch (error) {
