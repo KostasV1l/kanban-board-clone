@@ -14,14 +14,13 @@ router.get("/health", (req, res) => {
 // Auth routes
 router.use("/auth", authRoutes);
 
-// Boards routes
+// Boards routes (which include member and list routes)
 router.use("/boards", boardRoutes);
 
-// List routes
+// List routes (which include task routes)
 router.use("/lists", listRoutes);
 
 // Task routes
 router.use("/tasks", taskRoutes);
-
 
 module.exports = router;

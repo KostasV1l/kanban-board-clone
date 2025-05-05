@@ -8,23 +8,24 @@ import { useCreateList } from "@entities/list/hooks";
 
 interface NewListColumnProps {
     boardId: string;
-    currentLength: number; // To keep track of list order
+    currentLength: number; 
 }
 
 export const NewListColumn = ({ boardId, currentLength }: NewListColumnProps) => {
     const [title, setTitle] = useState("");
     const [editing, setEditing] = useState(false);
-    const createList = useCreateList();
-    const isCreating = createList.isPending;
+    const { mutate: createList, isPending: isCreating } = useCreateList();
 
     const handleCreate = () => {
         if (!title.trim()) return;
 
-        createList.mutate(
+        createList(
             {
-                name: title.trim(),
-                board: boardId,
-                order: currentLength,
+                boardId,
+                data: {
+                    name: title.trim(),
+                    order: currentLength,
+                },
             },
             {
                 onSuccess: () => {
@@ -46,7 +47,7 @@ export const NewListColumn = ({ boardId, currentLength }: NewListColumnProps) =>
                             placeholder="List name"
                             className="text-sm"
                         />
-                        <Button size="sm" className="w-full" onClick={handleCreate} disabled={!title.trim() || isCreating}>
+                        <Button size="sm" className="w-full" onClick={handleCreate} disabled={isCreating}>
                             {isCreating ? "Creating..." : "Create"}
                         </Button>
                     </div>

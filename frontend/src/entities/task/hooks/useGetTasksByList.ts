@@ -3,10 +3,10 @@ import { TaskAPI } from "../api";
 import { taskKeys } from "../model";
 import { ITask } from "../model";
 
-export const useGetTasksByList = (listId: string) => {
+export const useGetTasksByList = (boardId: string, listId: string) => {
     return useQuery<ITask[]>({
         queryKey: taskKeys.list(listId),
-        queryFn: () => TaskAPI.getTasksByList(listId),
+        queryFn: () => TaskAPI.getTasksByList(boardId, listId),
         staleTime: 5 * 60 * 1000,
     });
 };

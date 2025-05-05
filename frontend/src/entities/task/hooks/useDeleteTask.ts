@@ -6,7 +6,8 @@ import { taskKeys } from "../model";
 
 export const useDeleteTask = () => {
     return useMutation({
-        mutationFn: (taskId: string) => TaskAPI.deleteTask(taskId),
+        mutationFn: (data: { boardId: string; listId: string; taskId: string }) =>
+            TaskAPI.deleteTask(data.boardId, data.listId, data.taskId),
         onSuccess: deletedTask => {
             queryClient.invalidateQueries({ queryKey: taskKeys.list(deletedTask.listId) });
             queryClient.invalidateQueries({ queryKey: boardKeys.lists() });

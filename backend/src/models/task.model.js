@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const { baseOptions } = require("./base.model");
+const { TASK_STATUS, TASK_PRIORITY } = require("../config/constants");
 
 const TaskSchema = new mongoose.Schema(
   {
@@ -28,12 +29,12 @@ const TaskSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["todo", "in-progress", "completed"],
+      enum: Object.values(TASK_STATUS),
     },
     priority: {
       type: String,
-      enum: ["low", "medium", "high"],
-      default: "medium",
+      enum: Object.values(TASK_PRIORITY),
+      default: TASK_PRIORITY.MEDIUM,
     },
     dueDate: {
       type: Date,
@@ -52,8 +53,6 @@ const TaskSchema = new mongoose.Schema(
 );
 
 // Indexes for faster queries
-TaskSchema.index({ user: 1 });
-TaskSchema.index({ guestId: 1 });
 TaskSchema.index({ list: 1 });
 TaskSchema.index({ board: 1 });
 TaskSchema.index({ assignedTo: 1 });

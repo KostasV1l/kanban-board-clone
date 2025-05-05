@@ -15,18 +15,19 @@ import { cn } from "@/lib/utils";
 interface CardOptionsButtonProps {
     taskId: number;
     listId: string;
+    boardId: string;
 }
 
-export const CardOptionsButton = ({ taskId, listId }: CardOptionsButtonProps) => {
+export const CardOptionsButton = ({ taskId, listId, boardId }: CardOptionsButtonProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const deleteTask = useDeleteTask();
 
     const handleMenuItemClick = (action: string) => {
         // Handle different menu item actions
-        console.log(`Action ${action} for task ${taskId} in list ${listId}`);
+        console.log(`Action ${action} for task ${taskId} in list ${listId} in board ${boardId}`);
 
         if (action === "delete") {
-            deleteTask.mutate(taskId.toString());
+            deleteTask.mutate({ boardId: boardId, listId: listId, taskId: taskId.toString() });
         }
 
         setIsOpen(false);

@@ -28,8 +28,9 @@ interface ListColumnProps {
 }
 
 export const ListColumn = ({ list }: ListColumnProps) => {
-    const deleteListMutation = useDeleteList(list.board);
-    const updateList = useUpdateList();
+    const { mutate: deleteList, isPending: isDeleting } = useDeleteList();
+    const { mutate: updateList } = useUpdateList();
+
 
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: list.id });
     const style = { transform: CSS.Transform.toString(transform), transition };
@@ -37,19 +38,15 @@ export const ListColumn = ({ list }: ListColumnProps) => {
     const [isEditing, setIsEditing] = useState(false);
     const [isAddingTask, setIsAddingTask] = useState(false);
     const [name, setName] = useState(list.name);
-    const { data: tasks = [], isLoading } = useGetTasksByList(list.id);
+    const { data: tasks = [], isLoading } = useGetTasksByList(list.boardId, list.id);
 
-    const handleDelete = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        deleteListMutation.mutate(list.id);
+    const handleDelete = () => {
+        deleteList({ boardId: list.boardId, listId: list.id });
     };
 
     const handleNameUpdate = () => {
         if (name.trim() && name !== list.name) {
-            updateList.mutate({
-                id: list.id,
-                data: { name },
-            });
+            updateList({ boardId: list.boardId, listId: list.id, data: { name } });
         }
         setIsEditing(false);
     };
@@ -91,8 +88,7 @@ export const ListColumn = ({ list }: ListColumnProps) => {
                             variant="ghost"
                             size="icon"
                             className="h-6 w-6 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                            disabled={deleteListMutation.isPending}
-                            onMouseDown={(e) => e.stopPropagation()}
+                            disabled={isDeleting}
                         >
                             <Trash className="h-4 w-4" />
                         </Button>
@@ -110,9 +106,9 @@ export const ListColumn = ({ list }: ListColumnProps) => {
                                 <Button
                                     variant="destructive"
                                     onClick={handleDelete}
-                                    disabled={deleteListMutation.isPending}
+                                    disabled={isDeleting}
                                 >
-                                    {deleteListMutation.isPending ? "Deleting..." : "Delete"}
+                                    {isDeleting ? "Deleting..." : "Delete"}
                                 </Button>
                             </AlertDialogAction>
                         </AlertDialogFooter>
@@ -132,7 +128,7 @@ export const ListColumn = ({ list }: ListColumnProps) => {
 
             <div className="border-t p-3">
                 {isAddingTask ? (
-                    <TaskCreateForm listId={list.id} boardId={list.board} onCancel={() => setIsAddingTask(false)} />
+                    <TaskCreateForm listId={list.id} boardId={list.boardId} onCancel={() => setIsAddingTask(false)} />
                 ) : (
                     <Button
                         variant="ghost"

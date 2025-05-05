@@ -6,10 +6,10 @@ import { queryClient } from "@shared/api/query-client";
 export const useUpdateList = () => {
 
     return useMutation({
-        mutationFn: ({ id, data }: { id: string; data: UpdateListDto }) => ListAPI.updateList(id, data),
+        mutationFn: ({ boardId, listId, data }: { boardId: string, listId: string, data: UpdateListDto }) => ListAPI.updateList(boardId, listId, data),
         onSuccess: data => {
             queryClient.invalidateQueries({ queryKey: listKeys.list(data.id) });
-            queryClient.invalidateQueries({ queryKey: listKeys.boardLists(data.board) });
+            queryClient.invalidateQueries({ queryKey: listKeys.boardLists(data.boardId) });
         },
     });
 };
