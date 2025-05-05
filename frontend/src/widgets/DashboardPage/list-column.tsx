@@ -16,6 +16,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { List } from "@/entities/list/model";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { useDeleteList, useUpdateList } from "@entities/list/hooks";
 import { useGetTasksByList } from "@entities/task";
 import { TaskCreateForm } from "@features/task";
@@ -29,6 +31,9 @@ export const ListColumn = ({ list }: ListColumnProps) => {
     const { mutate: deleteList, isPending: isDeleting } = useDeleteList();
     const { mutate: updateList } = useUpdateList();
 
+
+    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: list.id });
+    const style = { transform: CSS.Transform.toString(transform), transition };
 
     const [isEditing, setIsEditing] = useState(false);
     const [isAddingTask, setIsAddingTask] = useState(false);
@@ -47,9 +52,14 @@ export const ListColumn = ({ list }: ListColumnProps) => {
     };
 
     return (
-        <div className="flex h-full min-w-[250px] flex-col rounded-lg border bg-card">
+        <div style={style} ref={setNodeRef} className="flex h-full min-w-[250px] flex-col rounded-lg border bg-card">
             <div className="flex items-center justify-between border-b p-3 gap-2">
-                <div className="flex-1">
+                <div
+                    className="flex-1 cursor-grab active:cursor-grabbing"
+                    {...listeners}
+                    {...attributes}
+                    title="Drag to reorder"
+                >
                     {isEditing ? (
                         <Input
                             value={name}
@@ -58,12 +68,14 @@ export const ListColumn = ({ list }: ListColumnProps) => {
                             onKeyDown={e => e.key === "Enter" && handleNameUpdate()}
                             className="text-sm"
                             autoFocus
+                            onClick={(e) => e.stopPropagation()}
                         />
                     ) : (
                         <h3
                             className="font-medium text-sm cursor-pointer"
                             onClick={() => setIsEditing(true)}
                             title="Click to edit name"
+                            onMouseDown={(e) => e.stopPropagation()}
                         >
                             {list.name}
                         </h3>

@@ -52,19 +52,20 @@ class ListService extends BaseService {
         { session, new: true }
       );
 
-      const plainList = createdListDoc.toObject ? createdListDoc.toObject() : createdListDoc;
+      const plainList = createdListDoc.toObject
+        ? createdListDoc.toObject()
+        : createdListDoc;
       const { __v, _id, board, ...restOfList } = plainList;
       transformedList = {
-          ...restOfList,
-          id: _id,
-          boardId: board
+        ...restOfList,
+        id: _id,
+        boardId: board,
       };
 
       await session.commitTransaction();
-
     } catch (error) {
       if (session.inTransaction()) {
-          await session.abortTransaction();
+        await session.abortTransaction();
       }
       console.error("Error during createList transaction:", error);
       throw error;
@@ -72,9 +73,8 @@ class ListService extends BaseService {
       session.endSession();
     }
 
-
     return transformedList;
-}
+  }
 
   async updateList(listId, data) {
     if (!listId) throw new Error("list Id is required");
@@ -112,16 +112,16 @@ class ListService extends BaseService {
     try {
       const list = await List.findById(listId).session(session);
       if (!list) {
-         await session.abortTransaction();
-         session.endSession();
-         throw new Error("List not found");
+        await session.abortTransaction();
+        session.endSession();
+        throw new Error("List not found");
       }
 
       const plainList = list.toObject ? list.toObject() : list;
       const { __v, _id, board, ...restOfList } = plainList;
       transformedList = {
-          ...restOfList,
-          boardId: board,
+        ...restOfList,
+        boardId: board,
       };
 
       await List.findByIdAndDelete(listId).session(session);
@@ -132,10 +132,9 @@ class ListService extends BaseService {
       );
 
       await session.commitTransaction();
-
     } catch (error) {
       if (session.inTransaction()) {
-          await session.abortTransaction();
+        await session.abortTransaction();
       }
       console.error("Error during deleteList transaction:", error);
       throw error;
@@ -144,7 +143,37 @@ class ListService extends BaseService {
     }
 
     return transformedList;
-}
+  }
+
+  async reorderLists(boardId, listsIds) {
+    if (!boardId || !Array.isArray(listsIds)) throw new Error("Invalid input");
+
+    const session = await mongoose.startSession();
+
+    try {
+      session.startTransaction();
+
+      const updatedLists = [];
+
+      for (let i = 0; i < listsIds.length; i++) {
+        const listId = listsIds[i];
+        const updated = await List.findByIdAndUpdate(
+          listId,
+          { order: i },
+          { new: true, session }
+        );
+        updatedLists.push(updated);
+      }
+
+      await session.commitTransaction();
+      return updatedLists;
+    } catch (err) {
+      await session.abortTransaction();
+      throw err;
+    } finally {
+      session.endSession();
+    }
+  }
 }
 
 module.exports = new ListService();

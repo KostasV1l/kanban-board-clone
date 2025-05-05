@@ -8,7 +8,7 @@ import { useCreateList } from "@entities/list/hooks";
 
 interface NewListColumnProps {
     boardId: string;
-    currentLength: number; // To keep track of list order
+    currentLength: number; 
 }
 
 export const NewListColumn = ({ boardId, currentLength }: NewListColumnProps) => {
