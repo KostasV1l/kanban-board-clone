@@ -45,3 +45,23 @@ exports.inviteMembers = async (req, res) => {
     });
   }
 };
+
+exports.deleteMember = async (req, res) => {
+  const { memberId, boardId } = req.params;
+
+  try {
+    const deletedMember = await memberService.deleteMember(memberId, boardId);
+    res.status(200).json(deletedMember);
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+
+    console.error(
+      `Error deleting member ${memberId} from board ${boardId}:`,
+      error
+    );
+
+    res.status(statusCode).json({
+      message: statusCode === 500 ? "Internal server error" : error.message,
+    });
+  }
+};

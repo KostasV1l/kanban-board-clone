@@ -5,17 +5,15 @@ import { queryClient } from "@shared/api/query-client";
 import { MemberAPI } from "../api";
 import { memberKeys } from "../model/query-keys";
 
-export const useInviteUserByEmail = () => {
+export const useDeleteMember = () => {
     return useMutation({
-        mutationFn: (data: { boardId: string; email: string; role: string }) =>
-            MemberAPI.inviteUserByEmail(data.boardId, { email: data.email, role: data.role }),
+        mutationFn: (data: { boardId: string; memberId: string }) => MemberAPI.deleteMember(data.boardId, data.memberId),
         onSuccess: (data, variables) => {
-            const email = data?.user?.email || "User";
-            toast.success(`${email} invited successfully`);
+            toast.success("Member deleted successfully");
             queryClient.invalidateQueries({ queryKey: memberKeys.board(variables.boardId) });
         },
         onError: error => {
-            handleApiError(error, "Invite user by email");
+            handleApiError(error, "Delete member");
         },
     });
 };

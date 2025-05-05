@@ -37,8 +37,9 @@ class MemberService extends BaseService {
       const user = await User.findOne({ email }).session(session);
 
       if (!user) {
-        const error = new Error("User not found with that email");
+        const error = new Error("User not found");
         error.statusCode = 404;
+        error.message = "Email doesn't match any registered user";
         throw error;
       }
 
@@ -73,6 +74,48 @@ class MemberService extends BaseService {
       return await this.model
         .findById(newMembershipDoc._id)
         .populate("user", "id username email");
+    } catch (error) {
+      await session.abortTransaction();
+      throw error;
+    } finally {
+      session.endSession();
+    }
+  }
+
+  async deleteMember(memberId, boardId) {
+    if (
+      !mongoose.Types.ObjectId.isValid(memberId) ||
+      !mongoose.Types.ObjectId.isValid(boardId)
+    ) {
+      const error = new Error("Invalid member or board ID");
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+      const membership = await this.model
+        .findOne({
+          user: memberId,
+          board: boardId,
+        })
+        .session(session);
+
+      if (!membership) {
+        const error = new Error("Member not found");
+        error.statusCode = 404;
+        throw error;
+      }
+
+      // Delete the membership
+      const result = await this.model
+        .findByIdAndDelete(membership._id)
+        .session(session);
+
+      await session.commitTransaction();
+      return result;
     } catch (error) {
       await session.abortTransaction();
       throw error;

@@ -8,5 +8,9 @@ export const MemberAPI = {
     inviteUserByEmail: async (boardId: string, data: { email: string, role: string }) => {
         const { data: response } = await axiosInstance.post<IMember>(`/boards/${boardId}/members`, data);
         return response;
+    },
+    deleteMember: async (boardId: string, memberId: string) => {
+        const { data: response } = await axiosInstance.delete<IMember>(`/boards/${boardId}/members/${memberId}`);
+        return response;
     }
 }
