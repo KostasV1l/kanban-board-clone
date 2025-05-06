@@ -9,6 +9,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { InviteMemberDialog } from "./InviteMemberDialog";
+import { useAuthStatus } from "@/features/auth/hooks";
 
 interface BoardMembersPanelProps {
   boardId: string;
@@ -17,6 +18,10 @@ interface BoardMembersPanelProps {
 export const BoardMembersPanel = ({ boardId }: BoardMembersPanelProps) => {
   const { data: members = [], isLoading, error } = useGetMembers(boardId);
   const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
+  const { user } = useAuthStatus();
+  
+  const currentUserMembership = members.find(member => member.user?.id === user?.id);
+  const isOwner = currentUserMembership?.role === "OWNER";
   
   if (isLoading) {
     return <div className="flex items-center gap-2 text-muted-foreground"><Users className="size-4" /> Loading members...</div>;
@@ -60,7 +65,13 @@ export const BoardMembersPanel = ({ boardId }: BoardMembersPanelProps) => {
                 </p>
               ) : (
                 members.map((member) => (
-                  <MemberItem key={member.id} member={member} />
+                  <MemberItem 
+                    key={member.id} 
+                    member={member} 
+                    boardId={boardId}
+                    isCurrentUser={member.user?.id === user?.id}
+                    isOwner={isOwner}
+                  />
                 ))
               )}
             </div>

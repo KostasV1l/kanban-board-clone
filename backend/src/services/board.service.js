@@ -3,6 +3,7 @@ const Board = require("../models/board.model");
 const Task = require("../models/task.model");
 const BoardMember = require("../models/boardMember.model");
 const List = require("../models/list.model");
+const { BadRequestError } = require("../utils/ApiError");
 
 class BoardService extends BaseService {
   constructor() {
@@ -11,15 +12,16 @@ class BoardService extends BaseService {
 
   async getBoardsByUser(userId, role = null) {
     try {
+      if (!userId) {
+        throw new BadRequestError("User ID is required");
+      }
+
       const query = { user: userId };
       if (role) {
         query.role = role;
       }
 
-      console.log("query", query);
-
       const memberships = await BoardMember.find(query).lean();
-
       const boardIds = memberships.map((member) => member.board);
 
       if (boardIds.length === 0) {
@@ -27,7 +29,6 @@ class BoardService extends BaseService {
       }
 
       const boards = await this.model.find({ _id: { $in: boardIds } }).lean();
-
       const boardRoleMap = {};
 
       memberships.forEach((membership) => {
@@ -37,9 +38,7 @@ class BoardService extends BaseService {
       const boardsWithDetails = await Promise.all(
         boards.map(async (board) => {
           const lists = await List.find({ board: board._id }).lean();
-
           const listIds = lists.map((list) => list._id);
-
           const tasksCount = await Task.countDocuments({
             list: { $in: listIds },
           });
@@ -54,28 +53,17 @@ class BoardService extends BaseService {
         })
       );
 
-      console.log("boardsWithDetails", boardsWithDetails);
-
       return boardsWithDetails;
     } catch (error) {
-      console.error("Error fetching boards by user:", error);
       throw error;
     }
   }
 
-  async getBoardsByGuest(guestId) {
-    if (!guestId) throw new Error("Guest ID is required");
-    return await this.model.find({ guestId });
-  }
-
   async deleteAllBoardsByUser(userId) {
-    if (!userId) throw new Error("User ID is required");
+    if (!userId) {
+      throw new BadRequestError("User ID is required");
+    }
     return await this.model.deleteMany({ user: userId });
-  }
-
-  async deleteAllBoardsByGuest(guestId) {
-    if (!guestId) throw new Error("Guest ID is required");
-    return await this.model.deleteMany({ guestId });
   }
 }
 

@@ -1,11 +1,21 @@
 const crypto = require("crypto");
 const RefreshToken = require("../models/refreshToken.model");
 const User = require("../models/user.model");
+const mongoose = require("mongoose");
 const {
   generateRefreshToken,
   generateAccessToken,
   verifyRefreshToken,
 } = require("../utils/jwt.utils");
+const logger = require("../config/logger");
+const {
+  UserExistsError,
+  TokenError,
+  InvalidCredentialsError,
+  NotFoundError,
+  BadRequestError,
+  ConflictError,
+} = require("../utils/ApiError");
 
 const MAX_TOKENS_PER_USER = 5;
 
@@ -75,36 +85,48 @@ exports.cleanupExpiredTokens = async () => {
   const result = await RefreshToken.deleteMany({
     expiresAt: { $lt: new Date() },
   });
-  console.log(`Cleaned up ${result.deletedCount} expired refresh tokens`);
+  logger.info(`Cleaned up ${result.deletedCount} expired refresh tokens`);
   return result.deletedCount;
 };
 
 exports.register = async ({ email, password, username }, res, req) => {
-  const userExists = await User.findOne({ email });
+  try {
+    if (!email || !password || !username) {
+      throw new BadRequestError("Email, password, and username are required");
+    }
 
-  if (userExists) throw new Error("USER_EXISTS");
+    const emailExists = await User.findOne({ email });
+    if (emailExists) {
+      throw new UserExistsError("User already exists with this email"); 
+    }
 
-  const user = await User.create({ email, password, username });
+    const usernameExists = await User.findOne({ username });
+    if (usernameExists) {
+      throw new ConflictError(`Username '${username}' is already taken.`);
+    }
 
-  const accessToken = generateAccessToken(user._id);
-  const refreshToken = generateRefreshToken(user._id);
+    const user = await User.create({ email, password, username });
 
-  await saveRefreshToken(refreshToken, user._id, req);
+    const accessToken = generateAccessToken(user._id);
+    const refreshToken = generateRefreshToken(user._id);
 
-  const csrfToken = setTokenCookies(res, accessToken, refreshToken);
+    await saveRefreshToken(refreshToken, user._id, req);
+    const csrfToken = setTokenCookies(res, accessToken, refreshToken);
 
-  return { user, csrfToken };
+    return { user, csrfToken };
+  } catch (error) {
+    throw error;
+  }
 };
 
 exports.login = async ({ email, password }, res, req) => {
   const user = await User.findOne({ email }).select("+password");
   if (!user || !(await user.matchPassword(password))) {
-    throw new Error("INVALID_CREDENTIALS");
+    throw new InvalidCredentialsError("Invalid email or password");
   }
 
   const accessToken = generateAccessToken(user._id);
   const refreshToken = generateRefreshToken(user._id);
-
 
   await saveRefreshToken(refreshToken, user._id, req);
 
@@ -114,13 +136,16 @@ exports.login = async ({ email, password }, res, req) => {
 };
 
 exports.refresh = async (refreshTokenCookie, res, req) => {
-
-  if (!refreshTokenCookie) throw new Error("NO_REFRESH_TOKEN");
+  if (!refreshTokenCookie) {
+    throw new TokenError("No refresh token provided");
+  }
 
   // Find the token and update its lastUsed time
   const saved = await RefreshToken.findOne({ token: refreshTokenCookie });
 
-  if (!saved) throw new Error("BAD_REFRESH_TOKEN");
+  if (!saved) {
+    throw new TokenError("Invalid or expired refresh token");
+  }
 
   const decoded = verifyRefreshToken(refreshTokenCookie);
 
@@ -149,7 +174,6 @@ exports.refresh = async (refreshTokenCookie, res, req) => {
 
 exports.logout = async (refreshTokenCookie) => {
   try {
-
     if (!refreshTokenCookie) {
       return { success: false, reason: "NO_TOKEN" };
     }
@@ -164,7 +188,7 @@ exports.logout = async (refreshTokenCookie) => {
 
     return { success: true, deletedCount: result.deletedCount };
   } catch (error) {
-    return { success: false, error: error.message };
+    throw error;
   }
 };
 
@@ -177,9 +201,17 @@ exports.getUserSessions = async (userId) => {
 };
 
 exports.revokeSession = async (sessionId, userId) => {
+  if (!mongoose.Types.ObjectId.isValid(sessionId)) {
+    throw new BadRequestError("Invalid session ID");
+  }
+
   return await RefreshToken.deleteOne({ _id: sessionId, userId });
 };
 
-exports.revokeAllSessions = async (userId) => {
-  return await RefreshToken.deleteMany({ userId });
+exports.revokeAllSessions = async (userId, currentSessionTokenToExclude = null) => {
+  const query = { userId };
+  if (currentSessionTokenToExclude) {
+    query.token = { $ne: currentSessionTokenToExclude }; // $ne means "not equal"
+  }
+  return await RefreshToken.deleteMany(query);
 };
