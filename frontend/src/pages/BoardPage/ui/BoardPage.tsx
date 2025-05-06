@@ -51,9 +51,7 @@ const BoardPage = () => {
         <DndContext onDragEnd={handleDragEnd}>
             <div className="flex justify-between items-center p-4 border-b mb-4">
                 <h1 className="text-2xl font-bold">{board?.name || "Board"}</h1>
-                <div className="flex items-center gap-2">
-                    <BoardMembersPanel boardId={id} />
-                </div>
+                <div className="flex items-center gap-2">{board && <BoardMembersPanel boardId={board.id} />}</div>
             </div>
             <SortableContext items={dataLists.map(list => list.id)} strategy={horizontalListSortingStrategy}>
                 <div style={{ display: "flex", gap: "16px", overflowX: "auto" }}>

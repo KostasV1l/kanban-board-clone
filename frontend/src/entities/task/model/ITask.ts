@@ -12,11 +12,7 @@ export interface ITask extends BaseEntity {
     status?: TaskStatus;
     priority: TaskPriority;
     dueDate?: string;
-    assignedTo?: {
-        id: string;
-        name: string;
-        avatar?: string;
-    };
+    assignedTo?: string | null;
     createdBy?: {
         id: string;
         name: string;
