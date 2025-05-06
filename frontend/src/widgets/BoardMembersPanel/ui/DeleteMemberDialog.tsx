@@ -24,8 +24,14 @@ export const DeleteMemberDialog = ({ boardId, member, isOpen, onClose }: DeleteM
     const { mutate: deleteMember, isPending, error: mutationError } = useDeleteMember();
 
     const handleDelete = () => {
-        deleteMember(
-            { boardId, memberId: member.user.id },
+
+        const data = {
+            boardId,
+            memberId: member.user.id,
+        }
+
+
+        deleteMember(data,
             {
                 onSuccess: () => {
                     onClose();

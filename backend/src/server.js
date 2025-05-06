@@ -9,7 +9,7 @@ const logger = require("./config/logger");
 
 // Import routes, middleware, and config
 const routes = require("./routes");
-const errorHandler = require("./middleware/errorHandler");
+const globalErrorHandler = require("./middleware/errorHandler.middleware");
 const connectDB = require("./config/db");
 const authService = require("./services/auth.service");
 
@@ -38,7 +38,7 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 app.use("/api", routes);
 
 // Error handling middleware
-app.use(errorHandler);
+app.use(globalErrorHandler);
 
 // Connect to MongoDB and start server
 const startServer = async () => {
@@ -52,19 +52,19 @@ const startServer = async () => {
     setInterval(async () => {
       try {
         const removed = await authService.cleanupExpiredTokens();
-        console.log(`Scheduled cleanup: removed ${removed} expired tokens`);
+        logger.info(`Scheduled cleanup: removed ${removed} expired tokens`);
       } catch (err) {
-        console.error("Error in scheduled token cleanup:", err);
+        logger.error("Error in scheduled token cleanup:", err);
       }
     }, 24 * 60 * 60 * 1000); // 24 hours
 
     app.listen(PORT, () => {
-      console.log(
+      logger.info(
         `Server running in ${process.env.NODE_ENV} mode on port ${PORT}`
       );
     });
   } catch (error) {
-    console.error(`Failed to start server: ${error.message}`);
+    logger.error(`Failed to start server: ${error.message}`);
     process.exit(1);
   }
 };

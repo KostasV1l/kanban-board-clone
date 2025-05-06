@@ -6,6 +6,7 @@ const {
   generateAccessToken,
   verifyRefreshToken,
 } = require("../utils/jwt.utils");
+const logger = require("../config/logger");
 
 const MAX_TOKENS_PER_USER = 5;
 
@@ -75,7 +76,7 @@ exports.cleanupExpiredTokens = async () => {
   const result = await RefreshToken.deleteMany({
     expiresAt: { $lt: new Date() },
   });
-  console.log(`Cleaned up ${result.deletedCount} expired refresh tokens`);
+  logger.info(`Cleaned up ${result.deletedCount} expired refresh tokens`);
   return result.deletedCount;
 };
 
@@ -99,12 +100,13 @@ exports.register = async ({ email, password, username }, res, req) => {
 exports.login = async ({ email, password }, res, req) => {
   const user = await User.findOne({ email }).select("+password");
   if (!user || !(await user.matchPassword(password))) {
-    throw new Error("INVALID_CREDENTIALS");
+    const error = new Error("Invalid Credentials");
+    error.statusCode = 401;
+    throw error;
   }
 
   const accessToken = generateAccessToken(user._id);
   const refreshToken = generateRefreshToken(user._id);
-
 
   await saveRefreshToken(refreshToken, user._id, req);
 
@@ -114,7 +116,6 @@ exports.login = async ({ email, password }, res, req) => {
 };
 
 exports.refresh = async (refreshTokenCookie, res, req) => {
-
   if (!refreshTokenCookie) throw new Error("NO_REFRESH_TOKEN");
 
   // Find the token and update its lastUsed time
@@ -149,7 +150,6 @@ exports.refresh = async (refreshTokenCookie, res, req) => {
 
 exports.logout = async (refreshTokenCookie) => {
   try {
-
     if (!refreshTokenCookie) {
       return { success: false, reason: "NO_TOKEN" };
     }

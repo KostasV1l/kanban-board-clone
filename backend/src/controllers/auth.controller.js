@@ -29,10 +29,12 @@ exports.login = async (req, res, next) => {
       user: { id: user.id, username: user.username, email: user.email },
     });
   } catch (err) {
-    const code = err.message === "INVALID_CREDENTIALS" ? 401 : 500;
-    res.status(code).json({
-      message: "Invalid Credentials",
-    });
+    const statusCode = err.statusCode || 500;
+    res
+      .status(statusCode)
+      .json({
+        message: statusCode === 500 ? "Internal server error" : err.message,
+      });
   }
 };
 
@@ -50,8 +52,11 @@ exports.refreshToken = async (req, res) => {
 };
 
 exports.logout = async (req, res) => {
-  console.log("Logout endpoint called, refresh token exists:", !!req.cookies.refreshToken);
-  
+  console.log(
+    "Logout endpoint called, refresh token exists:",
+    !!req.cookies.refreshToken
+  );
+
   const result = await authService.logout(req.cookies.refreshToken);
   console.log("Logout service result:", result);
 
@@ -61,10 +66,10 @@ exports.logout = async (req, res) => {
   res.clearCookie("accessToken");
   res.clearCookie("csrf-token");
 
-  res.status(200).json({ 
-    success: true, 
+  res.status(200).json({
+    success: true,
     message: "Logged out successfully",
-    tokenDeleted: result?.success || false 
+    tokenDeleted: result?.success || false,
   });
 };
 exports.getCurrentUser = (req, res) => {
@@ -83,7 +88,7 @@ exports.getUserSessions = async (req, res) => {
     const sessions = await authService.getUserSessions(req.user.id);
     res.status(200).json({
       success: true,
-      sessions
+      sessions,
     });
   } catch (err) {
     res.status(500).json({ message: "Failed to retrieve sessions" });
@@ -95,14 +100,14 @@ exports.revokeSession = async (req, res) => {
   try {
     const { sessionId } = req.params;
     const result = await authService.revokeSession(sessionId, req.user.id);
-    
+
     if (result.deletedCount === 0) {
       return res.status(404).json({ message: "Session not found" });
     }
-    
+
     res.status(200).json({
       success: true,
-      message: "Session revoked successfully"
+      message: "Session revoked successfully",
     });
   } catch (err) {
     res.status(500).json({ message: "Failed to revoke session" });
@@ -115,22 +120,24 @@ exports.revokeAllSessions = async (req, res) => {
     // Keep the current session active
     const currentRefreshToken = req.cookies.refreshToken;
     let currentSession = null;
-    
+
     if (currentRefreshToken) {
-      currentSession = await RefreshToken.findOne({ token: currentRefreshToken });
+      currentSession = await RefreshToken.findOne({
+        token: currentRefreshToken,
+      });
     }
-    
+
     // Delete all other sessions
     await authService.revokeAllSessions(req.user.id);
-    
+
     // Re-save the current session if needed
     if (currentSession) {
       await currentSession.save();
     }
-    
+
     res.status(200).json({
       success: true,
-      message: "All sessions revoked except current one"
+      message: "All sessions revoked except current one",
     });
   } catch (err) {
     res.status(500).json({ message: "Failed to revoke all sessions" });

@@ -1,3 +1,4 @@
+const logger = require("../config/logger");
 const User = require("../models/user.model");
 const { verifyAccessToken } = require("../utils/jwt.utils");
 
@@ -9,7 +10,7 @@ exports.protect = async (req, res, next) => {
 
 
     if (!accessToken) {
-      console.log("Authentication failed: No access token");
+      logger.error("Authentication failed: No access token");
       return res.status(401).json({ message: "Not authenticated" });
     }
 
@@ -17,7 +18,7 @@ exports.protect = async (req, res, next) => {
       !req.path.includes("/refresh") &&
       ( !csrfTokenHeader || !csrfTokenCookie || csrfTokenHeader !== csrfTokenCookie )
     ) {
-      console.log("Authentication failed: CSRF validation failed");
+      logger.error("Authentication failed: CSRF validation failed");
       return res.status(403).json({ message: "Invalid CSRF token" });
     }
 
@@ -25,12 +26,12 @@ exports.protect = async (req, res, next) => {
 
     req.user = await User.findById(decoded.id);
     if (!req.user) {
-      console.log("Authentication failed: User not found");
+      logger.error("Authentication failed: User not found");
       return res.status(401).json({ message: "User not found" });
     }
     next();
   } catch (err) {
-    console.log("Authentication error:", err);
+    logger.error("Authentication error:", err);
     return res.status(401).json({ message: "Not authenticated" });
   }
 };
