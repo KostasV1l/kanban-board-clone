@@ -1,5 +1,7 @@
+const logger = require("../config/logger");
 const User = require("../models/user.model");
 const { verifyAccessToken } = require("../utils/jwt.utils");
+const { UnauthorizedError, CSRFError } = require("../utils/ApiError");
 
 exports.protect = async (req, res, next) => {
   try {
@@ -7,31 +9,27 @@ exports.protect = async (req, res, next) => {
     const csrfTokenHeader = req.headers["x-csrf-token"];
     const csrfTokenCookie = req.cookies["csrf-token"];
 
-
     if (!accessToken) {
-      console.log("Authentication failed: No access token");
-      return res.status(401).json({ message: "Not authenticated" });
+      return next(new UnauthorizedError("Not authenticated"));
     }
 
     if (
       !req.path.includes("/refresh") &&
-      ( !csrfTokenHeader || !csrfTokenCookie || csrfTokenHeader !== csrfTokenCookie )
+      (!csrfTokenHeader || !csrfTokenCookie || csrfTokenHeader !== csrfTokenCookie)
     ) {
-      console.log("Authentication failed: CSRF validation failed");
-      return res.status(403).json({ message: "Invalid CSRF token" });
+      return next(new CSRFError("Invalid CSRF token"));
     }
 
     const decoded = verifyAccessToken(accessToken);
 
     req.user = await User.findById(decoded.id);
     if (!req.user) {
-      console.log("Authentication failed: User not found");
-      return res.status(401).json({ message: "User not found" });
+      return next(new UnauthorizedError("User not found"));
     }
+    
     next();
   } catch (err) {
-    console.log("Authentication error:", err);
-    return res.status(401).json({ message: "Not authenticated" });
+    return next(new UnauthorizedError("Not authenticated"));
   }
 };
 

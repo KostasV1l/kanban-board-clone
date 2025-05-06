@@ -1,6 +1,4 @@
-import { AlertCircle } from "lucide-react";
 import { useState } from "react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -25,7 +23,7 @@ export const InviteMemberDialog = ({ boardId, isOpen, onClose }: InviteMemberDia
     const [email, setEmail] = useState("");
     const [role, setRole] = useState("VIEWER");
 
-    const { mutate: inviteUser, isPending, error: mutationError } = useInviteUserByEmail();
+    const { mutate: inviteUser, isPending } = useInviteUserByEmail();
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -73,13 +71,6 @@ export const InviteMemberDialog = ({ boardId, isOpen, onClose }: InviteMemberDia
                             </SelectContent>
                         </Select>
                     </div>
-
-                    {mutationError && (
-                        <Alert variant="destructive" className="py-2">
-                            <AlertCircle className="h-4 w-4" />
-                            <AlertDescription>{mutationError.message}</AlertDescription>
-                        </Alert>
-                    )}
 
                     <DialogFooter className="pt-2">
                         <Button type="button" variant="outline" onClick={onClose} disabled={isPending}>

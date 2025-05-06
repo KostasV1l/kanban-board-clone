@@ -2,6 +2,11 @@ const BaseService = require("./base.service");
 const Task = require("../models/task.model");
 const List = require("../models/list.model");
 const mongoose = require("mongoose");
+const { 
+  BadRequestError, 
+  TaskNotFoundError,
+  ListNotFoundError
+} = require("../utils/ApiError");
 
 class TaskService extends BaseService {
   constructor() {
@@ -10,7 +15,13 @@ class TaskService extends BaseService {
 
   // Get all tasks for a specific list
   async getTasksByList(listId) {
-    if (!listId) throw new Error("List ID is required");
+    if (!listId) {
+      throw new BadRequestError("List ID is required");
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(listId)) {
+      throw new BadRequestError("Invalid list ID format");
+    }
 
     const tasks = await this.model
       .find({ list: listId })
@@ -22,7 +33,13 @@ class TaskService extends BaseService {
 
   // Get all tasks for a specific board
   async getTasksByBoard(boardId) {
-    if (!boardId) throw new Error("Board ID is required");
+    if (!boardId) {
+      throw new BadRequestError("Board ID is required");
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(boardId)) {
+      throw new BadRequestError("Invalid board ID format");
+    }
 
     const tasks = await this.model
       .find({ board: boardId })
@@ -34,6 +51,10 @@ class TaskService extends BaseService {
 
   // Create a new task
   async createTask(data) {
+    if (!data.list || !data.board || !data.title) {
+      throw new BadRequestError("List ID, board ID, and title are required");
+    }
+
     const session = await mongoose.startSession();
     try {
       // ensures that all ops either succeed or fail
@@ -55,11 +76,15 @@ class TaskService extends BaseService {
       const task = await this.model.create([data], { session });
 
       // Update the list to include this task
-      await List.findByIdAndUpdate(
+      const list = await List.findByIdAndUpdate(
         data.list,
         { $push: { tasks: task[0]._id } },
-        { session }
+        { session, new: true }
       );
+
+      if (!list) {
+        throw new ListNotFoundError();
+      }
 
       await session.commitTransaction();
       return task[0];
@@ -73,7 +98,13 @@ class TaskService extends BaseService {
 
   // Update a task
   async updateTask(taskId, data) {
-    if (!taskId) throw new Error("Task ID is required");
+    if (!taskId) {
+      throw new BadRequestError("Task ID is required");
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(taskId)) {
+      throw new BadRequestError("Invalid task ID format");
+    }
 
     // If list is being updated, we need to update the old and new lists
     if (data.list) {
@@ -83,7 +114,9 @@ class TaskService extends BaseService {
 
         // Get the current task to find the old list
         const currentTask = await this.model.findById(taskId);
-        if (!currentTask) throw new Error("Task not found");
+        if (!currentTask) {
+          throw new TaskNotFoundError();
+        }
 
         // If the list is changed
         if (currentTask.list.toString() !== data.list.toString()) {
@@ -95,11 +128,15 @@ class TaskService extends BaseService {
           );
 
           // Add task to new list
-          await List.findByIdAndUpdate(
+          const newList = await List.findByIdAndUpdate(
             data.list,
             { $push: { tasks: taskId } },
-            { session }
+            { session, new: true }
           );
+
+          if (!newList) {
+            throw new ListNotFoundError("The new list was not found");
+          }
         }
 
         // Update the task
@@ -111,6 +148,10 @@ class TaskService extends BaseService {
           runValidators: true,
         });
 
+        if (!updatedTask) {
+          throw new TaskNotFoundError();
+        }
+
         await session.commitTransaction();
         return updatedTask;
       } catch (error) {
@@ -121,16 +162,28 @@ class TaskService extends BaseService {
       }
     } else {
       // Simple update without list changes
-      return await this.model.findByIdAndUpdate(taskId, data, {
+      const updatedTask = await this.model.findByIdAndUpdate(taskId, data, {
         new: true,
         runValidators: true,
       });
+
+      if (!updatedTask) {
+        throw new TaskNotFoundError();
+      }
+
+      return updatedTask;
     }
   }
 
   // Delete a task
   async deleteTask(taskId) {
-    if (!taskId) throw new Error("Task ID is required");
+    if (!taskId) {
+      throw new BadRequestError("Task ID is required");
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(taskId)) {
+      throw new BadRequestError("Invalid task ID format");
+    }
 
     const session = await mongoose.startSession();
     try {
@@ -138,7 +191,9 @@ class TaskService extends BaseService {
 
       // Get the task to find its list
       const task = await this.model.findById(taskId);
-      if (!task) throw new Error("Task not found");
+      if (!task) {
+        throw new TaskNotFoundError();
+      }
 
       // Remove task from list
       await List.findByIdAndUpdate(
@@ -151,7 +206,12 @@ class TaskService extends BaseService {
       const deletedTask = await this.model
         .findByIdAndDelete(taskId)
         .session(session);
-        // All changes made within the transaction are permanently saved to the database
+        
+      if (!deletedTask) {
+        throw new TaskNotFoundError();
+      }
+      
+      // All changes made within the transaction are permanently saved to the database
       await session.commitTransaction();
       return deletedTask;
     } catch (error) {
@@ -165,7 +225,14 @@ class TaskService extends BaseService {
 
   // Delete all tasks for a list
   async deleteTasksByList(listId) {
-    if (!listId) throw new Error("List ID is required");
+    if (!listId) {
+      throw new BadRequestError("List ID is required");
+    }
+    
+    if (!mongoose.Types.ObjectId.isValid(listId)) {
+      throw new BadRequestError("Invalid list ID format");
+    }
+    
     return await this.model.deleteMany({ list: listId });
   }
 }

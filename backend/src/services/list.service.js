@@ -2,6 +2,11 @@ const BaseService = require("./base.service");
 const List = require("../models/list.model");
 const Board = require("../models/board.model");
 const mongoose = require("mongoose");
+const { 
+  BadRequestError, 
+  ListNotFoundError, 
+  BoardNotFoundError 
+} = require("../utils/ApiError");
 
 class ListService extends BaseService {
   constructor() {
@@ -9,8 +14,9 @@ class ListService extends BaseService {
   }
 
   async getListsByBoard(boardId) {
-    if (!boardId) throw new Error("Board ID is required");
-    console.log("boardId", boardId);
+    if (!boardId) {
+      throw new BadRequestError("Board ID is required");
+    }
 
     const lists = await this.model.find({ board: boardId }).lean();
 
@@ -28,16 +34,29 @@ class ListService extends BaseService {
   }
 
   async deleteAllListsByBoard(boardId) {
-    if (!boardId) throw new Error("Board ID is required");
+    if (!boardId) {
+      throw new BadRequestError("Board ID is required");
+    }
     return await this.model.deleteMany({ board: boardId });
   }
 
   async getListById(listId) {
-    if (!listId) throw new Error("List ID is required");
+    if (!listId) {
+      throw new BadRequestError("List ID is required");
+    }
+    
+    if (!mongoose.Types.ObjectId.isValid(listId)) {
+      throw new BadRequestError("Invalid list ID format");
+    }
+    
     return await this.model.findById(listId);
   }
 
   async createList(data) {
+    if (!data.board || !data.name) {
+      throw new BadRequestError("Board ID and list name are required");
+    }
+
     const session = await mongoose.startSession();
     session.startTransaction();
 
@@ -46,20 +65,24 @@ class ListService extends BaseService {
     try {
       const [createdListDoc] = await this.model.create([data], { session });
 
-      await Board.findByIdAndUpdate(
+      const board = await Board.findByIdAndUpdate(
         createdListDoc.board,
         { $push: { lists: createdListDoc._id } },
         { session, new: true }
       );
 
+      if (!board) {
+        throw new BoardNotFoundError();
+      }
+
       const plainList = createdListDoc.toObject
         ? createdListDoc.toObject()
         : createdListDoc;
-      const { __v, _id, board, ...restOfList } = plainList;
+      const { __v, _id, board: boardId, ...restOfList } = plainList;
       transformedList = {
         ...restOfList,
         id: _id,
-        boardId: board,
+        boardId,
       };
 
       await session.commitTransaction();
@@ -67,7 +90,6 @@ class ListService extends BaseService {
       if (session.inTransaction()) {
         await session.abortTransaction();
       }
-      console.error("Error during createList transaction:", error);
       throw error;
     } finally {
       session.endSession();
@@ -77,7 +99,13 @@ class ListService extends BaseService {
   }
 
   async updateList(listId, data) {
-    if (!listId) throw new Error("list Id is required");
+    if (!listId) {
+      throw new BadRequestError("List ID is required");
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(listId)) {
+      throw new BadRequestError("Invalid list ID format");
+    }
 
     const session = await mongoose.startSession();
 
@@ -89,7 +117,9 @@ class ListService extends BaseService {
         session,
       });
 
-      if (!updatedList) throw new Error("List not found");
+      if (!updatedList) {
+        throw new ListNotFoundError();
+      }
 
       await session.commitTransaction();
       return updatedList;
@@ -102,7 +132,13 @@ class ListService extends BaseService {
   }
 
   async deleteList(listId) {
-    if (!listId) throw new Error("List ID is required");
+    if (!listId) {
+      throw new BadRequestError("List ID is required");
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(listId)) {
+      throw new BadRequestError("Invalid list ID format");
+    }
 
     const session = await mongoose.startSession();
     session.startTransaction();
@@ -112,9 +148,7 @@ class ListService extends BaseService {
     try {
       const list = await List.findById(listId).session(session);
       if (!list) {
-        await session.abortTransaction();
-        session.endSession();
-        throw new Error("List not found");
+        throw new ListNotFoundError();
       }
 
       const plainList = list.toObject ? list.toObject() : list;
@@ -136,7 +170,6 @@ class ListService extends BaseService {
       if (session.inTransaction()) {
         await session.abortTransaction();
       }
-      console.error("Error during deleteList transaction:", error);
       throw error;
     } finally {
       session.endSession();
@@ -146,7 +179,9 @@ class ListService extends BaseService {
   }
 
   async reorderLists(boardId, listsIds) {
-    if (!boardId || !Array.isArray(listsIds)) throw new Error("Invalid input");
+    if (!boardId || !Array.isArray(listsIds)) {
+      throw new BadRequestError("Valid board ID and list IDs array are required");
+    }
 
     const session = await mongoose.startSession();
 
@@ -162,14 +197,19 @@ class ListService extends BaseService {
           { order: i },
           { new: true, session }
         );
+        
+        if (!updated) {
+          throw new ListNotFoundError(`List with ID ${listId} not found`);
+        }
+        
         updatedLists.push(updated);
       }
 
       await session.commitTransaction();
       return updatedLists;
-    } catch (err) {
+    } catch (error) {
       await session.abortTransaction();
-      throw err;
+      throw error;
     } finally {
       session.endSession();
     }

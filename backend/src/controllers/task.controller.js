@@ -1,5 +1,6 @@
 const { TASK_STATUS, TASK_PRIORITY } = require("../config/constants");
 const taskService = require("../services/task.service");
+const { BadRequestError, TaskNotFoundError } = require("../utils/ApiError");
 
 // @desc    Get all tasks from a list
 // @route   GET /api/tasks/list/:listId
@@ -27,7 +28,7 @@ exports.getTasksByList = async (req, res, next) => {
 
     res.status(200).json(responseTasks);
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 
@@ -38,7 +39,7 @@ exports.getTasksByBoard = async (req, res, next) => {
     const tasks = await taskService.getTasksByBoard(req.params.boardId);
     res.status(200).json(tasks);
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 
@@ -49,12 +50,12 @@ exports.getTask = async (req, res, next) => {
     const task = await taskService.findById(req.params.taskId);
 
     if (!task) {
-      return res.status(404).json({ message: "Task not found" });
+      return next(new TaskNotFoundError());
     }
 
     res.status(200).json(task);
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 
@@ -68,21 +69,15 @@ exports.createTask = async (req, res, next) => {
       req.body;
 
     if (!title || typeof title !== "string" || !title.trim()) {
-      return res.status(400).json({
-        message: "Task title is required and must be a non-empty string",
-      });
+      return next(new BadRequestError("Task title is required and must be a non-empty string"));
     }
 
     if (status && !Object.values(TASK_STATUS).includes(status)) {
-      return res.status(400).json({
-        message: "Invalid status",
-      });
+      return next(new BadRequestError("Invalid status"));
     }
 
     if (priority && !Object.values(TASK_PRIORITY).includes(priority)) {
-      return res.status(400).json({
-        message: "Invalid priority",
-      });
+      return next(new BadRequestError("Invalid priority"));
     }
 
     const taskData = {
@@ -118,7 +113,7 @@ exports.createTask = async (req, res, next) => {
 
     res.status(201).json(responseTask);
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 
@@ -131,14 +126,14 @@ exports.updateTask = async (req, res, next) => {
     // Check if task exists
     const existingTask = await taskService.findById(taskId);
     if (!existingTask) {
-      return res.status(404).json({ message: "Task not found" });
+      return next(new TaskNotFoundError());
     }
 
     // Update the task
     const updatedTask = await taskService.updateTask(taskId, req.body);
     res.status(200).json(updatedTask);
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 
@@ -151,7 +146,7 @@ exports.deleteTask = async (req, res, next) => {
     // Check if task exists
     const existingTask = await taskService.findById(taskId);
     if (!existingTask) {
-      return res.status(404).json({ message: "Task not found" });
+      return next(new TaskNotFoundError());
     }
 
     // Delete the task
@@ -175,6 +170,6 @@ exports.deleteTask = async (req, res, next) => {
 
     res.status(200).json(responseTask);
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
