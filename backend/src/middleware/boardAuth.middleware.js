@@ -1,5 +1,7 @@
 const { ROLES, rolePermissions } = require("../config/constants");
 const BoardMember = require("../models/boardMember.model");
+const mongoose = require("mongoose");
+const { BadRequestError, UnauthorizedError, ForbiddenError } = require("../utils/ApiError");
 
 const checkBoardMembership = (requiredRole) => {
   return async (req, res, next) => {
@@ -7,11 +9,15 @@ const checkBoardMembership = (requiredRole) => {
     const userId = req.user.id;
 
     if (!userId) {
-      return res.status(401).json({ message: "Authentication required" });
+      return next(new UnauthorizedError("Authentication required"));
     }
 
     if (!boardId) {
-      return res.status(400).json({ message: "boardId is required" });
+      return next(new BadRequestError("boardId is required"));
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(boardId)) {
+      return next(new BadRequestError("Invalid board ID format"));
     }
 
     try {
@@ -21,27 +27,23 @@ const checkBoardMembership = (requiredRole) => {
       }).lean();
 
       if (!membership) {
-        return res.status(403).json({
-          message: "Access denied. You are not a member of this board.",
-        });
+        return next(new ForbiddenError("Access denied. You are not a member of this board."));
       }
 
-      const allowedRoles = rolePermissions[membership.role] || [];
+      const userRole = membership.role;
+      const allowedOperationsForRole = rolePermissions[userRole] || [];
 
-      if (!allowedRoles.includes(requiredRole)) {
-        return res.status(403).json({
-          message: `Access denied: Requires ${requiredRole} role or higher`,
-        });
+      if (!allowedOperationsForRole.includes(requiredRole)) {
+        return next(new ForbiddenError(
+          `Access denied: Your role ('${userRole}') does not permit '${requiredRole}' operation on this board.`
+        ));
       }
 
       req.boardMember = membership;
 
       return next();
     } catch (error) {
-      console.error("Error checking board membership:", error);
-      return res
-        .status(500)
-        .json({ message: "Internal server error", error: error.message });
+      return next(error);
     }
   };
 };

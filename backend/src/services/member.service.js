@@ -3,6 +3,12 @@ const BaseService = require("./base.service");
 const User = require("../models/user.model");
 const BoardMember = require("../models/boardMember.model");
 const mongoose = require("mongoose");
+const { 
+  BadRequestError, 
+  UserNotFoundError, 
+  MemberExistsError,
+  NotFoundError
+} = require("../utils/ApiError");
 
 class MemberService extends BaseService {
   constructor() {
@@ -10,24 +16,18 @@ class MemberService extends BaseService {
   }
 
   async inviteUserByEmail(boardId, email, role = ROLES.VIEWER) {
-    if (!boardId || !mongoose.Types.ObjectId.isValid(boardId)) {
-      const error = new Error("Invalid board ID");
-      error.statusCode = 400;
-      throw error;
+    if (!boardId) {
+      throw new BadRequestError("Board ID is required");
     }
 
     if (!email) {
-      const error = new Error("Email is required");
-      error.statusCode = 400;
-      throw error;
+      throw new BadRequestError("Email is required");
     }
 
     if (!Object.values(ROLES).includes(role)) {
-      const error = new Error(
+      throw new BadRequestError(
         `Invalid role. Valid roles are: ${Object.values(ROLES).join(", ")}`
       );
-      error.statusCode = 400;
-      throw error;
     }
 
     const session = await mongoose.startSession();
@@ -37,10 +37,7 @@ class MemberService extends BaseService {
       const user = await User.findOne({ email }).session(session);
 
       if (!user) {
-        const error = new Error("User not found");
-        error.statusCode = 404;
-        error.message = "Email doesn't match any registered user";
-        throw error;
+        throw new UserNotFoundError("Email doesn't match any registered user");
       }
 
       const existingMembership = await this.model
@@ -51,14 +48,12 @@ class MemberService extends BaseService {
         .session(session);
 
       if (existingMembership) {
-        const error = new Error("User is already a member of this board");
-        error.statusCode = 409;
-        error.membership = {
+        const membership = {
           id: existingMembership.id,
           email: user.email,
           role: existingMembership.role,
         };
-        throw error;
+        throw new MemberExistsError("User is already a member of this board", membership);
       }
 
       const newMembershipDoc = new this.model({
@@ -83,13 +78,8 @@ class MemberService extends BaseService {
   }
 
   async deleteMember(memberId, boardId) {
-    if (
-      !mongoose.Types.ObjectId.isValid(memberId) ||
-      !mongoose.Types.ObjectId.isValid(boardId)
-    ) {
-      const error = new Error("Invalid member or board ID");
-      error.statusCode = 400;
-      throw error;
+    if (!memberId || !boardId) {
+      throw new BadRequestError("Member ID and Board ID are required");
     }
 
     const session = await mongoose.startSession();
@@ -104,9 +94,7 @@ class MemberService extends BaseService {
         .session(session);
 
       if (!membership) {
-        const error = new Error("Member not found");
-        error.statusCode = 404;
-        throw error;
+        throw new NotFoundError("Member not found");
       }
 
       // Delete the membership

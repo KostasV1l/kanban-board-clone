@@ -2,6 +2,13 @@ const { default: mongoose } = require("mongoose");
 const boardService = require("../services/board.service");
 const BoardMember = require("../models/boardMember.model");
 const { ROLES } = require("../config/constants");
+const {
+  UnauthorizedError,
+  BadRequestError,
+  NotFoundError,
+  BoardAccessError,
+  BoardNotFoundError,
+} = require("../utils/ApiError");
 
 // @desc    Get all boards for authenticated user
 // @route   GET /api/boards?userId=123
@@ -15,9 +22,7 @@ exports.getBoards = async (req, res, next) => {
     } else {
       // Check if user is authenticated
       if (!req.user || !req.user.id) {
-        return res
-          .status(401)
-          .json({ message: "User authentication required" });
+        return next(new UnauthorizedError("User authentication required"));
       }
       // Get boards for the current authenticated user
       boards = await boardService.getBoardsByUser(req.user.id);
@@ -25,27 +30,7 @@ exports.getBoards = async (req, res, next) => {
 
     res.status(200).json(boards);
   } catch (error) {
-    next(error);
-  }
-};
-
-// @desc    Get boards for guest user
-// @route   GET /api/boards/guest/:guestId
-exports.getGuestBoards = async (req, res, next) => {
-  try {
-    const { guestId } = req.params;
-
-    const boards = await boardService.getBoardsByGuest(guestId);
-
-    if (!boards.length) {
-      return res
-        .status(404)
-        .json({ message: "No boards found for this guest" });
-    }
-
-    res.status(200).json(boards);
-  } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 
@@ -56,12 +41,12 @@ exports.createBoard = async (req, res, next) => {
     const { name, description, color } = req.body;
 
     if (!name) {
-      return res.status(400).json({ message: "Name is required" });
+      return next(new BadRequestError("Name is required"));
     }
 
     // Check if user is authenticated
     if (!req.user || !req.user.id) {
-      return res.status(401).json({ message: "User authentication required" });
+      return next(new UnauthorizedError("User authentication required"));
     }
 
     const session = await mongoose.startSession();
@@ -77,12 +62,14 @@ exports.createBoard = async (req, res, next) => {
         { session }
       );
 
-      await BoardMember.create([
-        {
-          board: board._id,
-          user: req.user.id,
-          role: ROLES.OWNER,
-        }],
+      await BoardMember.create(
+        [
+          {
+            board: board._id,
+            user: req.user.id,
+            role: ROLES.OWNER,
+          },
+        ],
         { session }
       );
 
@@ -96,31 +83,7 @@ exports.createBoard = async (req, res, next) => {
       throw error;
     }
   } catch (error) {
-    next(error);
-  }
-};
-
-// @desc    Create a board for guest
-// @route   POST /api/boards/guest/:guestId
-exports.createGuestBoard = async (req, res, next) => {
-  try {
-    const { guestId } = req.params;
-    const { name, description, color } = req.body;
-
-    if (!name) {
-      return res.status(400).json({ message: "Name is required" });
-    }
-
-    const board = await boardService.create({
-      name,
-      description,
-      color,
-      guestId,
-    });
-
-    res.status(201).json(board);
-  } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 
@@ -131,23 +94,12 @@ exports.getBoard = async (req, res, next) => {
     const board = await boardService.findById(req.params.boardId);
 
     if (!board) {
-      return res.status(404).json({ message: "Board not found" });
-    }
-
-    // Check ownership for authenticated users
-    if (
-      board.user &&
-      req.user &&
-      board.user.toString() !== req.user.id?.toString()
-    ) {
-      return res
-        .status(401)
-        .json({ message: "Not authorized to access this board" });
+      return next(new BoardNotFoundError());
     }
 
     res.status(200).json(board);
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 
@@ -157,25 +109,10 @@ exports.updateBoard = async (req, res, next) => {
   try {
     const { name, description, color } = req.body;
 
-    if (!name) {
-      return res.status(400).json({ message: "Name is required" });
-    }
-
     let board = await boardService.findById(req.params.boardId);
 
     if (!board) {
-      return res.status(404).json({ message: "Board not found" });
-    }
-
-    // Check ownership
-    if (
-      board.user &&
-      req.user &&
-      board.user.toString() !== req.user.id?.toString()
-    ) {
-      return res
-        .status(401)
-        .json({ message: "Not authorized to update this board" });
+      return next(new BoardNotFoundError());
     }
 
     board = await boardService.update(req.params.boardId, {
@@ -186,7 +123,7 @@ exports.updateBoard = async (req, res, next) => {
 
     res.status(200).json(board);
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 
@@ -197,24 +134,13 @@ exports.deleteBoard = async (req, res, next) => {
     const board = await boardService.findById(req.params.boardId);
 
     if (!board) {
-      return res.status(404).json({ message: "Board not found" });
+      return next(new BoardNotFoundError());
     }
 
-    // Check ownership
-    if (
-      board.user &&
-      req.user &&
-      board.user.toString() !== req.user.id?.toString()
-    ) {
-      return res
-        .status(401)
-        .json({ message: "Not authorized to delete this board" });
-    }
+    const deletedBoard = await boardService.delete(req.params.boardId);
 
-    await boardService.delete(req.params.boardId);
-
-    res.status(204).send();
+    res.status(200).send(deletedBoard);
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };

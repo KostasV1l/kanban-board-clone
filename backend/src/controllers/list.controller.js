@@ -1,18 +1,16 @@
 const List = require("../models/list.model");
 const listService = require("../services/list.service");
+const { BadRequestError, NotFoundError, ListNotFoundError } = require("../utils/ApiError");
 
 // @desc    Get all lists from the board
 // @route   Get /api/boards/:boardId/lists
-
 exports.getLists = async (req, res, next) => {
   try {
     const boardId = req.params.boardId;
-
     const lists = await listService.getListsByBoard(boardId);
-
     res.status(200).json(lists);
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 
@@ -21,9 +19,12 @@ exports.getLists = async (req, res, next) => {
 exports.getList = async (req, res, next) => {
   try {
     const list = await listService.getListById(req.params.listId);
+    if (!list) {
+      return next(new ListNotFoundError());
+    }
     res.status(200).json(list);
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 
@@ -32,15 +33,14 @@ exports.getList = async (req, res, next) => {
 exports.createList = async (req, res, next) => {
   try {
     const boardId = req.params.boardId;
-
     const { name, order } = req.body;
 
     if (!name || typeof name !== "string" || !name.trim()) {
-      return res.status(400).json({ message: "Name is required" });
+      return next(new BadRequestError("Name is required"));
     }
 
     if (order === undefined) {
-      return res.status(400).json({ message: "Board and order are required" });
+      return next(new BadRequestError("Board and order are required"));
     }
 
     req.body.board = boardId;
@@ -48,7 +48,7 @@ exports.createList = async (req, res, next) => {
     const newList = await listService.createList(req.body);
     res.status(201).json(newList);
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 
@@ -62,7 +62,7 @@ exports.updateList = async (req, res, next) => {
     );
     res.status(200).json(updatedList);
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 
@@ -73,13 +73,13 @@ exports.deleteList = async (req, res, next) => {
     const list = await listService.getListById(req.params.listId);
 
     if (!list) {
-      return res.status(404).json({ message: "List not found" });
+      return next(new ListNotFoundError());
     }
 
     const deletedList = await listService.deleteList(req.params.listId);
     res.status(200).json(deletedList);
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 
@@ -88,7 +88,7 @@ exports.reorderLists = async (req, res, next) => {
     const { listUpdates } = req.body;
 
     if (!Array.isArray(listUpdates)) {
-      return res.status(400).json({ message: "listUpdates must be an array" });
+      return next(new BadRequestError("listUpdates must be an array"));
     }
 
     const updates = listUpdates.map(({ id, order }) =>
@@ -99,6 +99,6 @@ exports.reorderLists = async (req, res, next) => {
 
     res.status(200).json({ message: "Lists reordered" });
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
