@@ -49,7 +49,12 @@ export const TaskCard = ({ task, onClick }: TaskCardProps) => {
       className="rounded-md border bg-card p-3 shadow-sm hover:shadow-md transition-shadow cursor-pointer relative group"
       onClick={() => onClick?.(task)}
     >
-      <CardOptionsButton taskId={task.id} listId={task.listId} boardId={task.boardId} />
+      <CardOptionsButton 
+        taskId={task.id} 
+        listId={task.listId} 
+        boardId={task.boardId} 
+        onOpenCard={() => onClick?.(task)}
+      />
       
       <h3 className="font-medium text-sm pr-1">{task.title}</h3>
       

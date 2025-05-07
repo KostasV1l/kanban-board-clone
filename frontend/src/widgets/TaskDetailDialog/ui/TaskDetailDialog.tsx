@@ -45,15 +45,12 @@ export const TaskDetailDialog = ({ task, isOpen, onClose }: TaskDetailDialogProp
     const updateTask = useUpdateTask();
     const deleteTask = useDeleteTask();
 
-    // Use our task realtime hook to handle real-time task updates
     useTaskRealtime(
         task?.id || "",
         () => {
-            // When task is updated, refetch list to get updated task
             refetchList();
         },
         () => {
-            // When comments change, refetch members (which would typically include comment data)
             refetchMembers();
         },
     );
@@ -77,9 +74,6 @@ export const TaskDetailDialog = ({ task, isOpen, onClose }: TaskDetailDialogProp
 
     const handleUpdateTask = () => {
         if (!task || !title.trim()) return;
-
-        // Handle the unassigned case by explicitly setting to null
-        // In MongoDB, undefined fields in updates are ignored, but null will remove the assigned user
         const assignedToValue = assignedMemberId === "unassigned" ? null : assignedMemberId;
 
         updateTask.mutate(
@@ -157,7 +151,7 @@ export const TaskDetailDialog = ({ task, isOpen, onClose }: TaskDetailDialogProp
     return (
         <Dialog open={isOpen} onOpenChange={open => !open && onClose()}>
             <DialogContent className="sm:max-w-[600px] max-h-[85vh] overflow-y-auto">
-                <DialogHeader className="pb-4 border-b">
+                <DialogHeader className="mt-5 pb-4 border-b">
                     <DialogTitle className="flex justify-between items-center">
                         {isEditing ? (
                             <Input
@@ -171,7 +165,7 @@ export const TaskDetailDialog = ({ task, isOpen, onClose }: TaskDetailDialogProp
                         ) : (
                             <span className="text-lg font-bold">{task.title}</span>
                         )}
-                        <Badge variant="secondary" className={cn("ml-2 py-1 px-2", getPriorityColor(priority))}>
+                        <Badge variant="secondary" className={cn("py-1 px-2", getPriorityColor(priority))}>
                             {priority}
                         </Badge>
                     </DialogTitle>
