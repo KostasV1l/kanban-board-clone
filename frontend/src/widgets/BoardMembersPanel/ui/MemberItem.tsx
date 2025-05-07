@@ -9,11 +9,12 @@ import { MemberActionsDialog } from "./MemberActionsDialog";
 interface MemberItemProps {
   member: IMember;
   boardId: string;
-  isCurrentUser?: boolean; // If member is the current user
-  isOwner?: boolean; // If current user has ownership permissions
+  isCurrentUser?: boolean; 
+  isOwner?: boolean; 
+  onMemberSelect?: () => void;
 }
 
-export const MemberItem = ({ member, boardId, isCurrentUser = false, isOwner = false }: MemberItemProps) => {
+export const MemberItem = ({ member, boardId, isCurrentUser = false, isOwner = false, onMemberSelect }: MemberItemProps) => {
   const [showActionsDialog, setShowActionsDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   
@@ -38,6 +39,20 @@ export const MemberItem = ({ member, boardId, isCurrentUser = false, isOwner = f
   const handleDeleteAction = () => {
     setShowActionsDialog(false);
     setShowDeleteDialog(true);
+  };
+  
+  const handleActionsClose = () => {
+    setShowActionsDialog(false);
+    if (onMemberSelect) {
+      onMemberSelect();
+    }
+  };
+  
+  const handleDeleteDialogClose = () => {
+    setShowDeleteDialog(false);
+    if (onMemberSelect) {
+      onMemberSelect();
+    }
   };
 
   return (
@@ -65,18 +80,19 @@ export const MemberItem = ({ member, boardId, isCurrentUser = false, isOwner = f
       {showActionsDialog && (
         <MemberActionsDialog
           member={member}
+          boardId={boardId}
           isOpen={showActionsDialog}
-          onClose={() => setShowActionsDialog(false)}
+          onClose={handleActionsClose}
           onDelete={handleDeleteAction}
         />
       )}
 
       {showDeleteDialog && (
         <DeleteMemberDialog
-          boardId={boardId}
           member={member}
+          boardId={boardId}
           isOpen={showDeleteDialog}
-          onClose={() => setShowDeleteDialog(false)}
+          onClose={handleDeleteDialogClose}
         />
       )}
     </>

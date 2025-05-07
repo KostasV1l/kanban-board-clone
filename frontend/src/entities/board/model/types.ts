@@ -4,4 +4,5 @@ export interface Board {
     description: string;
     color: string;
     tasksCount?: number;
+    userRole?: string; 
 }
