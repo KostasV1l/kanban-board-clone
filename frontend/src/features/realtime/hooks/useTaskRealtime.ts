@@ -17,7 +17,7 @@ export function useTaskRealtime(taskId: string | number, onTaskChange?: () => vo
 
     // Task update event listener
     useRealtimeEvent<TaskSocketData>(RealtimeEvent.TASK_UPDATED, updatedTask => {
-        if (updatedTask.id.toString() === taskIdStr && onTaskChange) {
+        if (updatedTask && updatedTask.id && updatedTask.id.toString() === taskIdStr && onTaskChange) {
             console.log("Task updated:", updatedTask);
             queryClient.invalidateQueries({
                 queryKey: taskKeys.all,

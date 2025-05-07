@@ -30,10 +30,10 @@ const socketEvents = {
         getIO().to(`board:${boardId}`).emit("task:created", data);
     },
 
-    taskUpdated: (boardId, taskId, data) => {
+    taskUpdated: (boardId, data) => {
         getIO()
             .to(`board:${boardId}`)
-            .emit("task:updated", { taskId, ...data });
+            .emit("task:updated", data);
     },
 
     taskDeleted: (boardId, taskId) => {
