@@ -102,7 +102,10 @@ export const MemberItem = ({
                         </div>
 
                         <div className="flex items-center gap-2">
-                            <Badge variant="secondary" className={`${getRoleColor(member.role)} text-white text-xs`}>
+                            <Badge
+                                variant="secondary"
+                                className={`${getRoleColor(member.role)} text-white text-xs hover:${getRoleColor(member.role)}`}
+                            >
                                 {member.role}
                             </Badge>
                         </div>
