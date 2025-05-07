@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, Trash } from "lucide-react";
+import { GripVertical, Plus, Trash } from "lucide-react";
 import { useState } from "react";
 import {
     AlertDialog,
@@ -73,10 +73,7 @@ export const ListColumn = ({ list }: ListColumnProps) => {
         <div style={style} ref={setNodeRef} className="flex h-full min-w-[250px] flex-col rounded-lg border bg-card">
             <div className="flex items-center justify-between border-b p-3 gap-2">
                 <div
-                    className="flex-1 cursor-grab active:cursor-grabbing"
-                    {...listeners}
-                    {...attributes}
-                    title="Drag to reorder"
+                    className="flex-1"
                 >
                     {isEditing ? (
                         <Input
@@ -99,6 +96,17 @@ export const ListColumn = ({ list }: ListColumnProps) => {
                         </h3>
                     )}
                 </div>
+
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 text-muted-foreground cursor-grab active:cursor-grabbing"
+                    {...listeners}
+                    {...attributes}
+                    title="Drag to reorder"
+                >
+                    <GripVertical className="h-4 w-4" />
+                </Button>
                 <span className="rounded-full bg-primary/10 px-2 py-1 text-xs font-medium">{list.tasksCount}</span>
                 <AlertDialog>
                     <AlertDialogTrigger asChild>

@@ -128,19 +128,22 @@ class ListService extends BaseService {
                 throw new ListNotFoundError();
             }
 
-            await session.commitTransaction();
+
 
             // Format the list data for the socket event
             const plainList = updatedList.toObject ? updatedList.toObject() : updatedList;
             const { __v, _id, board, ...restOfList } = plainList;
             const formattedList = {
                 ...restOfList,
-                id: _id.toString(),
-                boardId: board.toString(),
+                id: _id,
+                boardId: boardId,
             };
 
             // Emit socket event for successful list update using the pre-fetched boardId
             socketEvents.listUpdated(boardId, listId, formattedList);
+
+            await session.commitTransaction();
+
 
             return formattedList;
         } catch (error) {
