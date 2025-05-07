@@ -89,6 +89,7 @@ export const ListColumn = ({ list }: ListColumnProps) => {
                             size="icon"
                             className="h-6 w-6 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                             disabled={isDeleting}
+                            aria-label={`Delete list ${name}`}
                         >
                             <Trash className="h-4 w-4" />
                         </Button>
@@ -107,6 +108,7 @@ export const ListColumn = ({ list }: ListColumnProps) => {
                                     variant="destructive"
                                     onClick={handleDelete}
                                     disabled={isDeleting}
+                                    aria-label={`Delete list ${name}`}
                                 >
                                     {isDeleting ? "Deleting..." : "Delete"}
                                 </Button>
@@ -135,6 +137,7 @@ export const ListColumn = ({ list }: ListColumnProps) => {
                         className="w-full justify-start"
                         size="sm"
                         onClick={() => setIsAddingTask(true)}
+                        aria-label={`Add Task`}
                     >
                         <Plus className="mr-2 h-4 w-4" />
                         Add Task
