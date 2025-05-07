@@ -20,7 +20,7 @@ class BaseService {
     async findById(id) {
         try {
             const document = await this.model.findById(id);
-            return document.toJSON();
+            return document ? document.toJSON() : null;
         } catch (error) {
             throw error;
         }
@@ -30,7 +30,7 @@ class BaseService {
     async findAll(filter = {}) {
         try {
             const documents = await this.model.find(filter);
-            return documents.map((doc) => doc.toJSON());
+            return documents && documents.length ? documents.map((doc) => doc.toJSON()) : [];
         } catch (error) {
             throw error;
         }
@@ -40,7 +40,7 @@ class BaseService {
     async update(id, data) {
         try {
             const document = await this.model.findByIdAndUpdate(id, data, { new: true, runValidators: true });
-            return document.toJSON();
+            return document ? document.toJSON() : null;
         } catch (error) {
             throw error;
         }
@@ -50,7 +50,7 @@ class BaseService {
     async delete(id) {
         try {
             const document = await this.model.findByIdAndDelete(id);
-            return document.toJSON();
+            return document ? document.toJSON() : null;
         } catch (error) {
             throw error;
         }

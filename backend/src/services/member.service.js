@@ -142,6 +142,64 @@ class MemberService extends BaseService {
             }
         }
     }
+
+    async updateMemberRole(memberId, boardId, newRole) {
+        if (!memberId || !boardId) {
+            throw new BadRequestError("Member ID and Board ID are required");
+        }
+
+        if (!Object.values(ROLES).includes(newRole)) {
+            throw new BadRequestError(`Invalid role. Valid roles are: ${Object.values(ROLES).join(", ")}`);
+        }
+
+        let session = null;
+        
+        try {
+            session = await mongoose.startSession();
+            session.startTransaction();
+            
+            const membership = await this.model
+                .findOne({
+                    user: memberId,
+                    board: boardId,
+                })
+                .session(session);
+
+            if (!membership) {
+                throw new NotFoundError("Member not found");
+            }
+
+            membership.role = newRole;
+            await membership.save({ session });
+            await session.commitTransaction();
+            
+            const updatedMembership = await this.model
+                .findById(membership._id)
+                .populate("user", "id username email");
+            
+            
+            return updatedMembership;
+        } catch (error) {
+            if (session) {
+                try {
+                    if (session.transaction && session.transaction.state === 'active') {
+                        await session.abortTransaction();
+                    }
+                } catch (abortError) {
+                    console.error("Error during transaction abort:", abortError);
+                }
+            }
+            throw error;
+        } finally {
+            if (session) {
+                try {
+                    await session.endSession();
+                } catch (endError) {
+                    console.error("Error ending session:", endError);
+                }
+            }
+        }
+    }
 }
 
 module.exports = new MemberService();
