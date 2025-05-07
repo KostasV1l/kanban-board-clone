@@ -3,6 +3,8 @@ import { boardKeys } from "@entities/board/model";
 import { queryClient } from "@shared/api/query-client";
 import { TaskAPI } from "../api";
 import { ITask, taskKeys } from "../model";
+import { handleApiError } from "@/shared/utils/error";
+import { toast } from "sonner";
 
 interface UpdateTaskParams {
     boardId: string;
@@ -15,6 +17,9 @@ export const useUpdateTask = () => {
     return useMutation({
         mutationFn: ({ boardId, listId, taskId, data }: UpdateTaskParams) =>
             TaskAPI.updateTask(boardId, listId, taskId, data),
+        onSuccess: () => {
+            toast.success("Task updated successfully");
+        },
         onMutate: async (variables) => {
             // Cancel any outgoing refetches to avoid overwriting our optimistic update
             await queryClient.cancelQueries({ queryKey: taskKeys.list(variables.listId) });
@@ -41,7 +46,8 @@ export const useUpdateTask = () => {
             return { previousTasks };
         },
         onError: (error, variables, context) => {
-            console.error('Error updating task:', error);
+            handleApiError(error, "Update task");
+            
             // If there was an error, revert to the previous state
             if (context?.previousTasks) {
                 queryClient.setQueryData(taskKeys.list(variables.listId), context.previousTasks);
