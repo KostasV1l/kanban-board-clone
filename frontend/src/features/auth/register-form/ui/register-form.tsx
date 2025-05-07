@@ -1,19 +1,15 @@
 "use client";
 
-import { LucideX } from "lucide-react";
 import { useForm } from "react-hook-form";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useRegister } from "@/features/auth/hooks";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RegisterFormData, registerSchema } from "../model";
-import { RegisterSuccessAlert } from "./register-success-alert";
 
 export function RegisterForm() {
-    const [isSuccess, setIsSuccess] = useState(false);
-    const { mutate: register, isPending, error: registerError } = useRegister();
+    const { mutate: register, isPending } = useRegister();
 
     const {
         register: registerField,
@@ -24,22 +20,11 @@ export function RegisterForm() {
     });
 
     const onSubmit = (data: RegisterFormData) => {
-        register(data, {
-            onSuccess: () => {
-                setIsSuccess(true);
-                // Redirect will happen automatically after showing the success message briefly
-            }
-        });
+        register(data);
     };
 
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {isSuccess && <RegisterSuccessAlert />}
-            {registerError && (
-                <div className="flex items-center font-sans p-3 gap-x-4 rounded-md bg-red-50 text-red-500 text-sm">
-                    <LucideX className="inline size-5" /> {registerError.message}
-                </div>
-            )}
             <div className="space-y-2">
                 <Label htmlFor="register-username">Username</Label>
                 <Input

@@ -14,6 +14,7 @@ export const useDeleteMember = () => {
         },
         onError: error => {
             handleApiError(error, "Delete member");
+            toast.error("Failed to delete member");
         },
     });
 };

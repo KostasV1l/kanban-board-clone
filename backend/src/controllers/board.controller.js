@@ -90,8 +90,10 @@ exports.createBoard = async (req, res, next) => {
 // @desc    Get a specific board
 // @route   GET /api/boards/:boardId
 exports.getBoard = async (req, res, next) => {
+  const { boardId } = req.params;
+
   try {
-    const board = await boardService.findById(req.params.boardId);
+    const board = await boardService.findById(boardId);
 
     if (!board) {
       return next(new BoardNotFoundError());

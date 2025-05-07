@@ -20,7 +20,7 @@ router.get("/:listId", protect, checkBoardMembership(ROLES.VIEWER), getList);
 router.post("/", protect, checkBoardMembership(ROLES.EDITOR), createList);
 router.put("/:listId", protect, checkBoardMembership(ROLES.EDITOR), updateList);
 router.delete("/:listId", protect, checkBoardMembership(ROLES.OWNER), deleteList);
-router.post("/boards/:boardId/reorder", protect, checkBoardMembership(ROLES.EDITOR), reorderLists);
+router.post("/reorder", protect, checkBoardMembership(ROLES.EDITOR), reorderLists);
 router.use("/:listId/tasks", taskRoutes);
 
 module.exports = router;

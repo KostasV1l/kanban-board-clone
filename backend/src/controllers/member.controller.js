@@ -43,3 +43,15 @@ exports.deleteMember = async (req, res, next) => {
     return next(error);
   }
 };
+
+exports.updateMemberRole = async (req, res, next) => {
+  const { memberId, boardId } = req.params;
+  const { role } = req.body;
+
+  try {
+    const updatedMember = await memberService.updateMemberRole(memberId, boardId, role);
+    res.status(200).json(updatedMember);
+  } catch (error) {
+    return next(error);
+  }
+};

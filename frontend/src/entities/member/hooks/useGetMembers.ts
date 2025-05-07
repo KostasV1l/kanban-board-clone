@@ -5,7 +5,8 @@ import { memberKeys } from "../model/query-keys";
 
 export const useGetMembers = (boardId: string) => {
     return useQuery<IMember[]>({
-        queryKey: memberKeys.board(boardId),
         queryFn: () => MemberAPI.getMembers(boardId),
+        queryKey: memberKeys.board(boardId),
+        enabled: !!boardId && boardId.trim() !== '',
     });
 };

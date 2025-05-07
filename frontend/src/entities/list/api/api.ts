@@ -62,7 +62,7 @@ export const ListAPI = {
     // Reorder lists within a board
     reorderLists: async (boardId: string, listUpdates: { id: string; order: number }[]): Promise<List[]> => {
         try {
-            const { data } = await axiosInstance.post<List[]>(`/boards/${boardId}/lists/reorder`, listUpdates);
+            const { data } = await axiosInstance.post<List[]>(`/boards/${boardId}/lists/reorder`, { listUpdates });
             return data;
         } catch (error) {
             console.error("Failed to reorder lists:", error);

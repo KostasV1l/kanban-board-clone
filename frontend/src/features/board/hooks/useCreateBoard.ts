@@ -2,8 +2,9 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Board, boardKeys } from "@/entities/board/model";
 import { useCurrentUser } from "@features/auth/hooks";
 import { BoardAPI } from "@features/board/api";
+import { handleApiError } from "@/shared/utils/error";
+import { toast } from "sonner";
 
-// Create a new board
 export const useCreateBoard = () => {
     const queryClient = useQueryClient();
     const { data: currentUser } = useCurrentUser();
@@ -12,6 +13,7 @@ export const useCreateBoard = () => {
     return useMutation({
         mutationFn: (board: Omit<Board, "id">) => BoardAPI.createBoard(board, userId),
         onSuccess: newBoard => {
+            toast.success("Board created successfully");
             // Invalidate and refetch
             queryClient.invalidateQueries({ queryKey: boardKeys.lists() });
 
@@ -19,6 +21,9 @@ export const useCreateBoard = () => {
             queryClient.setQueryData(boardKeys.lists(), (old: Board[] | undefined) =>
                 old ? [...old, newBoard] : [newBoard],
             );
+        },
+        onError: error => {
+            handleApiError(error, "Create board");
         },
     });
 };

@@ -1,6 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { List, ListAPI, listKeys } from "../model";
 import { queryClient } from "@shared/api/query-client";
+import { handleApiError } from "@shared/utils/error";
 
 // Reorder lists
 export const useReorderLists = () => {
@@ -17,6 +18,9 @@ export const useReorderLists = () => {
                 return found ? { ...list, order: found.order } : list;
               }).sort((a, b) => a.order - b.order);
             });
-          }
+        },
+        onError: error => {
+            handleApiError(error, "Reorder lists");
+        },
     });
 };
