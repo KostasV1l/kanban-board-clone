@@ -44,11 +44,16 @@ axiosInstance.interceptors.response.use(
     async error => {
         const originalRequest = error.config;
 
+        const isAuthEndpoint = 
+            originalRequest.url.includes("/auth/login") ||
+            originalRequest.url.includes("/auth/register");
+
         // If error is 401 and we haven't tried to refresh token yet
         if (
             error.response?.status === 401 &&
             !originalRequest._retry &&
-            !originalRequest.url.includes("/auth/refresh")
+            !originalRequest.url.includes("/auth/refresh") &&
+            !isAuthEndpoint
         ) {
             originalRequest._retry = true;
 
