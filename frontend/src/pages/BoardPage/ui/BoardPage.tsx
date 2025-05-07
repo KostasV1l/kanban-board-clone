@@ -1,12 +1,13 @@
 "use client";
 
 import { useBoard } from "@/features/board/hooks/useBoard";
+import { useBoardRealtime } from "@/features/realtime/hooks";
+import { ConnectionStatus } from "@/features/realtime/ui";
 import { BoardMembersPanel } from "@/widgets/BoardMembersPanel/ui/BoardMembersPanel";
 import { DndContext, DragEndEvent } from "@dnd-kit/core";
 import { arrayMove, horizontalListSortingStrategy, SortableContext } from "@dnd-kit/sortable";
 import { useParams } from "next/navigation";
 import { useGetLists, useReorderLists } from "@entities/list/hooks";
-import { List } from "@entities/list/model";
 import { ListColumn } from "@widgets/DashboardPage/list-column";
 import { NewListColumn } from "@widgets/DashboardPage/new-column";
 
@@ -14,11 +15,15 @@ export const dynamic = "force-dynamic";
 
 const BoardPage = () => {
     const { id } = useParams() as { id: string };
-
     const { data: board, isLoading: isLoadingBoard } = useBoard(id);
-    const { data: dataLists = [], isLoading: isLoadingLists, error } = useGetLists(id);
-
+    const { data: dataLists = [], isLoading: isLoadingLists, error, refetch } = useGetLists(id);
     const reorderLists = useReorderLists();
+
+    // Use the enhanced board realtime hook to handle real-time events
+    const { isConnected } = useBoardRealtime(id, {
+        onListChange: refetch,
+        onTaskChange: refetch,
+    });
 
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
@@ -39,31 +44,41 @@ const BoardPage = () => {
         });
     };
 
+    const lists = dataLists.map(list => list.id);
+
     if (isLoadingBoard || isLoadingLists) {
-        return <div>Loading....</div>;
+        return <p>Loading...</p>;
     }
 
     if (error) {
-        return <div>Error.....</div>;
+        return <p>Error loading data: {error.message}</p>;
+    }
+
+    if (!board) {
+        return <p>Board not found</p>;
     }
 
     return (
-        <DndContext onDragEnd={handleDragEnd}>
-            <div className="flex justify-between items-center p-4 border-b mb-4">
-                <h1 className="text-2xl font-bold">{board?.name || "Board"}</h1>
-                <div className="flex items-center gap-2">
-                    <BoardMembersPanel boardId={id} />
+        <div className="container mx-auto py-6">
+            <div className="flex justify-between items-center mb-6">
+                <div className="flex items-center gap-3">
+                    <h1 className="text-3xl font-bold">{board.name}</h1>
+                    <ConnectionStatus />
                 </div>
+                <BoardMembersPanel boardId={id} />
             </div>
-            <SortableContext items={dataLists.map(list => list.id)} strategy={horizontalListSortingStrategy}>
-                <div style={{ display: "flex", gap: "16px", overflowX: "auto" }}>
-                    {dataLists.map((list: List) => (
-                        <ListColumn key={list.id} list={list} />
-                    ))}
+
+            <DndContext onDragEnd={handleDragEnd}>
+                <div className="flex space-x-4 overflow-x-auto pb-4">
+                    <SortableContext items={lists} strategy={horizontalListSortingStrategy}>
+                        {dataLists.map(list => (
+                            <ListColumn key={list.id} list={list} />
+                        ))}
+                    </SortableContext>
                     <NewListColumn currentLength={dataLists.length} boardId={id} />
                 </div>
-            </SortableContext>
-        </DndContext>
+            </DndContext>
+        </div>
     );
 };
 

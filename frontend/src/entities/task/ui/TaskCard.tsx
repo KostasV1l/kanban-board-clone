@@ -2,6 +2,8 @@ import { ITask } from "../model";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { CardOptionsButton } from "@features/task/ui/task-options";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useGetMembers } from "@/entities/member/hooks";
 
 interface TaskCardProps {
   task: ITask;
@@ -9,18 +11,37 @@ interface TaskCardProps {
 }
 
 export const TaskCard = ({ task, onClick }: TaskCardProps) => {
+  // Fetch board members to get assignee details
+  const { data: members = [] } = useGetMembers(task.boardId);
+  
   // Get color based on priority
   const getPriorityColor = () => {
     switch (task.priority) {
       case "HIGH":
-        return "bg-red-100 text-red-800";
+        return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-200";
       case "MEDIUM":
-        return "bg-yellow-100 text-yellow-800";
+        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200";
       case "LOW":
-        return "bg-green-100 text-green-800";
+        return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200";
     }
+  };
+
+  // Find assigned member from the members list
+  const assignedMember = task.assignedTo 
+    ? members.find(member => member.user?.id === task.assignedTo)
+    : null;
+
+  // Generate initials from name
+  const getInitials = (name?: string): string => {
+    if (!name) return "?";
+    return name
+      .split(" ")
+      .map(part => part[0])
+      .join("")
+      .toUpperCase()
+      .substring(0, 2);
   };
 
   return (
@@ -30,7 +51,7 @@ export const TaskCard = ({ task, onClick }: TaskCardProps) => {
     >
       <CardOptionsButton taskId={task.id} listId={task.listId} boardId={task.boardId} />
       
-      <h3 className="font-medium text-sm">{task.title}</h3>
+      <h3 className="font-medium text-sm pr-1">{task.title}</h3>
       
       {task.description && (
         <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
@@ -45,7 +66,19 @@ export const TaskCard = ({ task, onClick }: TaskCardProps) => {
         >
           {task.priority}
         </Badge>
+
+        {assignedMember && assignedMember.user && (
+          <Avatar className="h-6 w-6 ml-2" title={`Assigned to: ${assignedMember.user.username}`}>
+            <AvatarImage 
+              src={assignedMember.user.username ? `https://avatar.vercel.sh/${assignedMember.user.username}` : undefined} 
+              alt={assignedMember.user.username || "Assigned user"}
+            />
+            <AvatarFallback className="text-xs">
+              {getInitials(assignedMember.user.username)}
+            </AvatarFallback>
+          </Avatar>
+        )}
       </div>
     </div>
   );
-}; 
+};
