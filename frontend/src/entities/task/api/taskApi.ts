@@ -12,6 +12,11 @@ export const TaskAPI = {
         return data;
     },
 
+    updateTask: async (boardId: string, listId: string, taskId: string, task: Partial<ITask>): Promise<ITask> => {
+        const { data } = await axiosInstance.put<ITask>(`/boards/${boardId}/lists/${listId}/tasks/${taskId}`, task);
+        return data;
+    },
+
     deleteTask: async (boardId: string, listId: string, taskId: string): Promise<ITask> => {
         const { data } = await axiosInstance.delete<ITask>(`/boards/${boardId}/lists/${listId}/tasks/${taskId}`);
         return data;

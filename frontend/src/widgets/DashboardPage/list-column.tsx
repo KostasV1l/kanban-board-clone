@@ -16,6 +16,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { List } from "@/entities/list/model";
+import { ITask } from "@/entities/task/model";
+import { useListRealtime } from "@/features/realtime/hooks";
+import { TaskDetailDialog } from "@/widgets/TaskDetailDialog";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useDeleteList, useUpdateList } from "@entities/list/hooks";
@@ -31,14 +34,29 @@ export const ListColumn = ({ list }: ListColumnProps) => {
     const { mutate: deleteList, isPending: isDeleting } = useDeleteList();
     const { mutate: updateList } = useUpdateList();
 
-
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: list.id });
     const style = { transform: CSS.Transform.toString(transform), transition };
 
     const [isEditing, setIsEditing] = useState(false);
     const [isAddingTask, setIsAddingTask] = useState(false);
     const [name, setName] = useState(list.name);
-    const { data: tasks = [], isLoading } = useGetTasksByList(list.boardId, list.id);
+    const { data: tasks = [], isLoading, refetch } = useGetTasksByList(list.boardId, list.id);
+
+    // State for the task detail dialog
+    const [selectedTask, setSelectedTask] = useState<ITask | null>(null);
+    const [isTaskDetailOpen, setIsTaskDetailOpen] = useState(false);
+
+    // Use our new useListRealtime hook to handle real-time task events
+    useListRealtime(list.id, list.boardId, refetch);
+
+    const handleTaskClick = (task: ITask) => {
+        setSelectedTask(task);
+        setIsTaskDetailOpen(true);
+    };
+
+    const handleCloseTaskDetail = () => {
+        setIsTaskDetailOpen(false);
+    };
 
     const handleDelete = () => {
         deleteList({ boardId: list.boardId, listId: list.id });
@@ -68,14 +86,14 @@ export const ListColumn = ({ list }: ListColumnProps) => {
                             onKeyDown={e => e.key === "Enter" && handleNameUpdate()}
                             className="text-sm"
                             autoFocus
-                            onClick={(e) => e.stopPropagation()}
+                            onClick={e => e.stopPropagation()}
                         />
                     ) : (
                         <h3
                             className="font-medium text-sm cursor-pointer"
                             onClick={() => setIsEditing(true)}
                             title="Click to edit name"
-                            onMouseDown={(e) => e.stopPropagation()}
+                            onMouseDown={e => e.stopPropagation()}
                         >
                             {list.name}
                         </h3>
@@ -103,11 +121,7 @@ export const ListColumn = ({ list }: ListColumnProps) => {
                         <AlertDialogFooter>
                             <AlertDialogCancel>Cancel</AlertDialogCancel>
                             <AlertDialogAction asChild>
-                                <Button
-                                    variant="destructive"
-                                    onClick={handleDelete}
-                                    disabled={isDeleting}
-                                >
+                                <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
                                     {isDeleting ? "Deleting..." : "Delete"}
                                 </Button>
                             </AlertDialogAction>
@@ -122,7 +136,7 @@ export const ListColumn = ({ list }: ListColumnProps) => {
                         <span className="text-sm text-muted-foreground">Loading tasks...</span>
                     </div>
                 ) : (
-                    <TaskList tasks={tasks} />
+                    <TaskList tasks={tasks} onTaskClick={handleTaskClick} />
                 )}
             </div>
 
@@ -141,6 +155,9 @@ export const ListColumn = ({ list }: ListColumnProps) => {
                     </Button>
                 )}
             </div>
+
+            {/* Task Detail Dialog */}
+            <TaskDetailDialog task={selectedTask} isOpen={isTaskDetailOpen} onClose={handleCloseTaskDetail} />
         </div>
     );
 };
