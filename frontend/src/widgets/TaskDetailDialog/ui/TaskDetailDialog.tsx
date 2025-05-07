@@ -397,13 +397,6 @@ export const TaskDetailDialog = ({ task, isOpen, onClose }: TaskDetailDialogProp
                     </TabsContent>
                 </Tabs>
 
-                {updateTask.isError && (
-                    <Alert variant="destructive" className="my-4">
-                        <AlertCircle className="h-4 w-4" />
-                        <AlertDescription>Failed to update task. Please try again.</AlertDescription>
-                    </Alert>
-                )}
-
                 <DialogFooter className="gap-2 flex-wrap sm:flex-nowrap mt-6 pt-4 border-t">
                     {isEditing ? (
                         <>
