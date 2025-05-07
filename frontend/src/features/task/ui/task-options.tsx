@@ -13,7 +13,7 @@ import { useDeleteTask } from "@/entities/task/hooks/useDeleteTask";
 import { cn } from "@/lib/utils";
 
 interface CardOptionsButtonProps {
-    taskId: string;
+    taskId: string | number;
     listId: string;
     boardId: string;
 }

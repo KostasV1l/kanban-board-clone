@@ -31,10 +31,7 @@ router.put("/:listId", protect, checkBoardMembership(ROLES.EDITOR), updateList);
 
 // Remove the list from the board
 router.delete("/:listId", protect, checkBoardMembership(ROLES.OWNER), deleteList);
-
-// Reorder the lists (drag and drop)
-router.post("/boards/:boardId/reorder", protect, checkBoardMembership(ROLES.EDITOR), reorderLists);
-
+router.post("/reorder", protect, checkBoardMembership(ROLES.EDITOR), reorderLists);
 router.use("/:listId/tasks", taskRoutes);
 
 module.exports = router;

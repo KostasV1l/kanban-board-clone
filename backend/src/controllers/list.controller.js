@@ -88,6 +88,7 @@ exports.reorderLists = async (req, res, next) => {
     const { listUpdates } = req.body;
 
     if (!Array.isArray(listUpdates)) {
+      console.log("listUpdates", listUpdates);
       return next(new BadRequestError("listUpdates must be an array"));
     }
 

@@ -1,6 +1,5 @@
 "use client";
 
-import { LucideX } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,7 +9,7 @@ import { useLogin } from "@features/auth/hooks";
 import { LoginFormData, loginSchema } from "../model";
 
 export function LoginForm() {
-    const { mutate: login, isPending, error: loginError } = useLogin();
+    const { mutate: login, isPending } = useLogin();
 
     const {
         register,
@@ -25,11 +24,6 @@ export function LoginForm() {
 
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {loginError && (
-                <div className="flex items-center font-sans p-3 gap-x-4 rounded-md bg-red-50 text-red-500 text-sm">
-                    <LucideX className="inline size-5" /> {loginError.message}
-                </div>
-            )}
             <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
