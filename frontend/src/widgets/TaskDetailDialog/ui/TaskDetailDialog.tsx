@@ -10,12 +10,13 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { useGetList } from "@/entities/list/hooks";
 import { useGetMembers } from "@/entities/member/hooks";
 import { IMember } from "@/entities/member/model";
-import { useGetList } from "@/entities/list/hooks";
 import { useDeleteTask } from "@/entities/task/hooks/useDeleteTask";
 import { useUpdateTask } from "@/entities/task/hooks/useUpdateTask";
 import { ITask, TaskPriority } from "@/entities/task/model";
+import { useTaskRealtime } from "@/features/realtime/hooks";
 import { cn } from "@/lib/utils";
 
 interface TaskDetailDialogProps {
@@ -32,13 +33,30 @@ export const TaskDetailDialog = ({ task, isOpen, onClose }: TaskDetailDialogProp
     const [isEditing, setIsEditing] = useState(false);
 
     // Fetch board members
-    const { data: members = [], isLoading: membersLoading } = useGetMembers(task?.boardId || "");
-    
+    const {
+        data: members = [],
+        isLoading: membersLoading,
+        refetch: refetchMembers,
+    } = useGetMembers(task?.boardId || "");
+
     // Fetch list details to get the list name
-    const { data: listData } = useGetList(task?.boardId || "", task?.listId || "");
+    const { data: listData, refetch: refetchList } = useGetList(task?.boardId || "", task?.listId || "");
 
     const updateTask = useUpdateTask();
     const deleteTask = useDeleteTask();
+
+    // Use our task realtime hook to handle real-time task updates
+    useTaskRealtime(
+        task?.id || "",
+        () => {
+            // When task is updated, refetch list to get updated task
+            refetchList();
+        },
+        () => {
+            // When comments change, refetch members (which would typically include comment data)
+            refetchMembers();
+        },
+    );
 
     // Reset form state when task changes
     useEffect(() => {
@@ -159,9 +177,7 @@ export const TaskDetailDialog = ({ task, isOpen, onClose }: TaskDetailDialogProp
                     </DialogTitle>
                     <div className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
                         <span>in list</span>
-                        <span className="font-medium text-foreground">
-                            {listData?.name || "Loading..."}
-                        </span>
+                        <span className="font-medium text-foreground">{listData?.name || "Loading..."}</span>
                     </div>
                 </DialogHeader>
 

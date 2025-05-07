@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { List } from "@/entities/list/model";
 import { ITask } from "@/entities/task/model";
+import { useListRealtime } from "@/features/realtime/hooks";
 import { TaskDetailDialog } from "@/widgets/TaskDetailDialog";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -39,11 +40,14 @@ export const ListColumn = ({ list }: ListColumnProps) => {
     const [isEditing, setIsEditing] = useState(false);
     const [isAddingTask, setIsAddingTask] = useState(false);
     const [name, setName] = useState(list.name);
-    const { data: tasks = [], isLoading } = useGetTasksByList(list.boardId, list.id);
+    const { data: tasks = [], isLoading, refetch } = useGetTasksByList(list.boardId, list.id);
 
     // State for the task detail dialog
     const [selectedTask, setSelectedTask] = useState<ITask | null>(null);
     const [isTaskDetailOpen, setIsTaskDetailOpen] = useState(false);
+
+    // Use our new useListRealtime hook to handle real-time task events
+    useListRealtime(list.id, list.boardId, refetch);
 
     const handleTaskClick = (task: ITask) => {
         setSelectedTask(task);

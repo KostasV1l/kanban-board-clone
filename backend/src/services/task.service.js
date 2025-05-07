@@ -2,6 +2,7 @@ const BaseService = require("./base.service");
 const Task = require("../models/task.model");
 const List = require("../models/list.model");
 const mongoose = require("mongoose");
+const socketEvents = require("../utils/socketEvents");
 const { BadRequestError, TaskNotFoundError, ListNotFoundError } = require("../utils/ApiError");
 
 class TaskService extends BaseService {
@@ -75,6 +76,10 @@ class TaskService extends BaseService {
             }
 
             await session.commitTransaction();
+
+            // Emit a socket event on task creation
+            socketEvents.taskCreated(data.board, task[0]);
+
             return task[0];
         } catch (error) {
             await session.abortTransaction();
@@ -94,9 +99,6 @@ class TaskService extends BaseService {
             throw new BadRequestError("Invalid task ID format");
         }
 
-        // Handle special case for removing assignments
-        // This ensures the field is properly unset when null is passed
-        // MongoDB normally ignores undefined values in updates
         const updateData = { ...data };
         if (updateData.assignedTo === null) {
             updateData.$unset = { assignedTo: 1 };
@@ -144,6 +146,10 @@ class TaskService extends BaseService {
                 }
 
                 await session.commitTransaction();
+                
+                // Emit the task moved event with the previous list ID
+                socketEvents.taskMoved(updatedTask.board, updatedTask, currentTask.list.toString());
+                
                 return updatedTask;
             } catch (error) {
                 await session.abortTransaction();
@@ -161,6 +167,9 @@ class TaskService extends BaseService {
             if (!updatedTask) {
                 throw new TaskNotFoundError();
             }
+
+            // Emit a socket event on task update
+            socketEvents.taskUpdated(updatedTask.board, updatedTask);
 
             return updatedTask;
         }
@@ -198,6 +207,10 @@ class TaskService extends BaseService {
 
             // All changes made within the transaction are permanently saved to the database
             await session.commitTransaction();
+
+            // Emit a socket event on task deletion
+            socketEvents.taskDeleted(deletedTask.board, deletedTask);
+
             return deletedTask;
         } catch (error) {
             await session.abortTransaction();

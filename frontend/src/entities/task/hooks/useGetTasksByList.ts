@@ -6,6 +6,6 @@ export const useGetTasksByList = (boardId: string, listId: string) => {
     return useQuery<ITask[]>({
         queryKey: taskKeys.list(listId),
         queryFn: () => TaskAPI.getTasksByList(boardId, listId),
-        staleTime: 30 * 1000,
+        staleTime: 0,
     });
 };
