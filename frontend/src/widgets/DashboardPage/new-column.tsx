@@ -91,13 +91,13 @@ export const NewListColumn = ({ boardId, currentLength }: NewListColumnProps) =>
                         </div>
                     </form>
                 ) : (
-                    <Button
-                        variant="ghost"
+                    <Button 
+                        variant="ghost" 
                         className="w-full justify-start text-sm cursor-pointer"
                         onClick={() => setEditing(true)}
                         aria-label="Add new list"
                     >
-                        <Plus className="mr-2 h-4 w-4" />
+                        <Plus className="mr-2 h-4 w-4" aria-hidden="true" />
                         Add List
                     </Button>
                 )}

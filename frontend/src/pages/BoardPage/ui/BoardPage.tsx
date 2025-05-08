@@ -68,16 +68,18 @@ const BoardPage = () => {
                 <BoardMembersPanel boardId={id} />
             </div>
 
-            <DndContext onDragEnd={handleDragEnd}>
-                <div className="flex space-x-4 overflow-x-auto pb-4">
-                    <SortableContext items={lists} strategy={horizontalListSortingStrategy}>
-                        {dataLists.map(list => (
-                            <ListColumn key={list.id} list={list} />
-                        ))}
-                    </SortableContext>
-                    <NewListColumn currentLength={dataLists.length} boardId={id} />
-                </div>
-            </DndContext>
+            <main id="main-content">
+                <DndContext onDragEnd={handleDragEnd}>
+                    <div className="flex space-x-4 overflow-x-auto pb-4">
+                        <SortableContext items={lists} strategy={horizontalListSortingStrategy}>
+                            {dataLists.map(list => (
+                                <ListColumn key={list.id} list={list} />
+                            ))}
+                        </SortableContext>
+                        <NewListColumn currentLength={dataLists.length} boardId={id} />
+                    </div>
+                </DndContext>
+            </main>
         </div>
     );
 };

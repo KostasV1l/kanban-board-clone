@@ -12,6 +12,20 @@ export interface RealtimeContextType extends RealtimeConnectionState {
     joinRoom: (roomId: string) => void;
     leaveRoom: (roomId: string) => void;
     emit: (event: RealtimeEvent, data?: any) => void;
+    
+    // Properties for accessibility announcements
+    lastTaskEvent?: {
+        type: 'created' | 'updated' | 'deleted'; 
+        task: TaskSocketData;
+    };
+    lastListEvent?: {
+        type: 'created' | 'updated' | 'deleted' | 'reordered';
+        list: ListSocketData;
+    };
+    lastMemberEvent?: {
+        type: 'added' | 'updated' | 'removed';
+        member: MemberSocketData;
+    };
 }
 
 // Event data types

@@ -1,6 +1,5 @@
-import { AlertCircle, Calendar, Check, Clock, MessageSquare, UserCircle2 } from "lucide-react";
+import { Calendar, Check, Clock, MessageSquare, UserCircle2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -55,22 +54,18 @@ export const TaskDetailDialog = ({ task, isOpen, onClose }: TaskDetailDialogProp
         },
     );
 
-    // Reset form state when task changes
+    // Reset form state when task changes or dialog opens/closes
     useEffect(() => {
-        if (task) {
+        if (isOpen && task) {
             setTitle(task.title);
             setDescription(task.description || "");
             setPriority(task.priority);
             setAssignedMemberId(task.assignedTo ?? undefined);
         }
-    }, [task]);
-
-    // Reset edit mode when dialog closes
-    useEffect(() => {
         if (!isOpen) {
-            setIsEditing(false);
+            setIsEditing(false); // Ensure editing mode is reset when dialog closes
         }
-    }, [isOpen]);
+    }, [isOpen, task]);
 
     const handleUpdateTask = () => {
         if (!task || !title.trim()) return;
@@ -149,8 +144,23 @@ export const TaskDetailDialog = ({ task, isOpen, onClose }: TaskDetailDialogProp
     const assignedMember = getAssignedMember();
 
     return (
-        <Dialog open={isOpen} onOpenChange={open => !open && onClose()}>
-            <DialogContent className="sm:max-w-[600px] max-h-[85vh] overflow-y-auto">
+        <Dialog
+            open={isOpen}
+            onOpenChange={open => {
+                if (!open) onClose();
+            }}
+        >
+            <DialogContent
+                className="sm:max-w-[600px] max-h-[85vh] overflow-y-auto"
+                onKeyDown={e => {
+                    // Radix Dialog typically handles Escape key to close via onOpenChange
+                    // Custom Escape key handling for edit mode can be added here if needed
+                    if (e.key === "Escape" && isEditing) {
+                        // Example: setIsEditing(false); e.stopPropagation();
+                    }
+                }}
+                tabIndex={-1} // Make DialogContent programmatically focusable
+            >
                 <DialogHeader className="mt-5 pb-4 border-b">
                     <DialogTitle className="flex justify-between items-center">
                         {isEditing ? (
@@ -159,7 +169,6 @@ export const TaskDetailDialog = ({ task, isOpen, onClose }: TaskDetailDialogProp
                                 onChange={e => setTitle(e.target.value)}
                                 className="text-lg font-bold"
                                 placeholder="Task title"
-                                autoFocus
                                 aria-label="Task title"
                             />
                         ) : (
