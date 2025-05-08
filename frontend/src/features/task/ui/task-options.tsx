@@ -43,9 +43,10 @@ export const CardOptionsButton = ({ taskId, listId, boardId, onOpenCard }: CardO
                     <Button
                         variant="ghost"
                         size="icon"
+                        aria-label="Task options"
                         className={cn("h-6 w-6 rounded-md hover:bg-accent/80", isOpen && "opacity-100 bg-accent/80")}
                     >
-                        <MoreHorizontal className="h-4 w-4" />
+                        <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
                     </Button>
                 </DropdownMenuTrigger>
 

@@ -1,6 +1,6 @@
-import { AlertCircle, Calendar, Check, Clock, MessageSquare, UserCircle2 } from "lucide-react";
-import { useEffect, useState } from "react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import FocusTrap from "focus-trap-react";
+import { Calendar, Check, Clock, MessageSquare, UserCircle2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -71,6 +71,29 @@ export const TaskDetailDialog = ({ task, isOpen, onClose }: TaskDetailDialogProp
             setIsEditing(false);
         }
     }, [isOpen]);
+
+    // Focus management
+    const initialFocusRef = useRef<HTMLInputElement>(null);
+    const returnFocusRef = useRef<HTMLElement | null>(null);
+
+    useEffect(() => {
+        // Store the currently focused element to return focus to later
+        if (isOpen) {
+            returnFocusRef.current = document.activeElement as HTMLElement;
+
+            // Set focus on the title input if editing, or the dialog itself if not
+            if (isEditing && initialFocusRef.current) {
+                setTimeout(() => {
+                    initialFocusRef.current?.focus();
+                }, 100);
+            }
+        } else if (returnFocusRef.current) {
+            // Return focus when dialog closes
+            setTimeout(() => {
+                returnFocusRef.current?.focus();
+            }, 100);
+        }
+    }, [isOpen, isEditing]);
 
     const handleUpdateTask = () => {
         if (!task || !title.trim()) return;
@@ -150,313 +173,329 @@ export const TaskDetailDialog = ({ task, isOpen, onClose }: TaskDetailDialogProp
 
     return (
         <Dialog open={isOpen} onOpenChange={open => !open && onClose()}>
-            <DialogContent className="sm:max-w-[600px] max-h-[85vh] overflow-y-auto">
-                <DialogHeader className="mt-5 pb-4 border-b">
-                    <DialogTitle className="flex justify-between items-center">
-                        {isEditing ? (
-                            <Input
-                                value={title}
-                                onChange={e => setTitle(e.target.value)}
-                                className="text-lg font-bold"
-                                placeholder="Task title"
-                                autoFocus
-                                aria-label="Task title"
-                            />
-                        ) : (
-                            <span className="text-lg font-bold">{task.title}</span>
-                        )}
-                        <Badge variant="secondary" className={cn("py-1 px-2", getPriorityColor(priority))}>
-                            {priority}
-                        </Badge>
-                    </DialogTitle>
-                    <div className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                        <span>in list</span>
-                        <span className="font-medium text-foreground">{listData?.name || "Loading..."}</span>
-                    </div>
-                </DialogHeader>
+            <FocusTrap active={isOpen} focusTrapOptions={{ initialFocus: isEditing ? initialFocusRef.current : false }}>
+                <DialogContent
+                    className="sm:max-w-[600px] max-h-[85vh] overflow-y-auto"
+                    onKeyDown={e => {
+                        // Close dialog on Escape key
+                        if (e.key === "Escape") {
+                            onClose();
+                        }
+                    }}
+                >
+                    <DialogHeader className="mt-5 pb-4 border-b">
+                        <DialogTitle className="flex justify-between items-center">
+                            {isEditing ? (
+                                <Input
+                                    ref={initialFocusRef}
+                                    value={title}
+                                    onChange={e => setTitle(e.target.value)}
+                                    className="text-lg font-bold"
+                                    placeholder="Task title"
+                                    autoFocus
+                                    aria-label="Task title"
+                                />
+                            ) : (
+                                <span className="text-lg font-bold">{task.title}</span>
+                            )}
+                            <Badge variant="secondary" className={cn("py-1 px-2", getPriorityColor(priority))}>
+                                {priority}
+                            </Badge>
+                        </DialogTitle>
+                        <div className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                            <span>in list</span>
+                            <span className="font-medium text-foreground">{listData?.name || "Loading..."}</span>
+                        </div>
+                    </DialogHeader>
 
-                <Tabs defaultValue="details" className="mt-4">
-                    <TabsList className="w-full grid grid-cols-2">
-                        <TabsTrigger value="details" className="rounded-md">
-                            Details
-                        </TabsTrigger>
-                        <TabsTrigger value="activity" className="rounded-md">
-                            Activity
-                        </TabsTrigger>
-                    </TabsList>
+                    <Tabs defaultValue="details" className="mt-4">
+                        <TabsList className="w-full grid grid-cols-2">
+                            <TabsTrigger value="details" className="rounded-md">
+                                Details
+                            </TabsTrigger>
+                            <TabsTrigger value="activity" className="rounded-md">
+                                Activity
+                            </TabsTrigger>
+                        </TabsList>
 
-                    <TabsContent value="details" className="space-y-6 mt-6 px-1">
-                        {isEditing ? (
-                            <>
-                                <div className="space-y-3">
-                                    <Label htmlFor="description" className="text-sm font-medium">
-                                        Description
-                                    </Label>
-                                    <Textarea
-                                        id="description"
-                                        value={description}
-                                        onChange={e => setDescription(e.target.value)}
-                                        placeholder="Add a more detailed description..."
-                                        className="min-h-[120px] resize-y"
-                                        aria-label="Task description"
-                                    />
-                                </div>
+                        <TabsContent value="details" className="space-y-6 mt-6 px-1">
+                            {isEditing ? (
+                                <>
+                                    <div className="space-y-3">
+                                        <Label htmlFor="description" className="text-sm font-medium">
+                                            Description
+                                        </Label>
+                                        <Textarea
+                                            id="description"
+                                            value={description}
+                                            onChange={e => setDescription(e.target.value)}
+                                            placeholder="Add a more detailed description..."
+                                            className="min-h-[120px] resize-y"
+                                            aria-label="Task description"
+                                        />
+                                    </div>
 
-                                <div className="space-y-3">
-                                    <Label htmlFor="assignee" className="text-sm font-medium">
-                                        Assignee
-                                    </Label>
-                                    <Select
-                                        value={assignedMemberId || "unassigned"}
-                                        onValueChange={setAssignedMemberId}
-                                    >
-                                        <SelectTrigger id="assignee" className="w-full">
-                                            <SelectValue placeholder="Unassigned" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="unassigned">
-                                                <div className="flex items-center gap-2">
-                                                    <UserCircle2 className="h-4 w-4 text-muted-foreground" />
-                                                    <span>Unassigned</span>
-                                                </div>
-                                            </SelectItem>
-                                            {members.map(member => (
-                                                <SelectItem key={member.user?.id} value={member.user?.id || ""}>
+                                    <div className="space-y-3">
+                                        <Label htmlFor="assignee" className="text-sm font-medium">
+                                            Assignee
+                                        </Label>
+                                        <Select
+                                            value={assignedMemberId || "unassigned"}
+                                            onValueChange={setAssignedMemberId}
+                                        >
+                                            <SelectTrigger id="assignee" className="w-full">
+                                                <SelectValue placeholder="Unassigned" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="unassigned">
                                                     <div className="flex items-center gap-2">
-                                                        <Avatar className="h-5 w-5">
-                                                            <AvatarImage
-                                                                src={
-                                                                    member.user?.username
-                                                                        ? `https://avatar.vercel.sh/${member.user.username}`
-                                                                        : undefined
-                                                                }
-                                                                alt={member.user?.username || "Member"}
-                                                            />
-                                                            <AvatarFallback className="text-xs">
-                                                                {getInitials(member.user?.username)}
-                                                            </AvatarFallback>
-                                                        </Avatar>
-                                                        <span>{member.user?.username}</span>
-                                                        <span className="text-xs text-muted-foreground ml-1">
-                                                            ({member.role})
-                                                        </span>
+                                                        <UserCircle2 className="h-4 w-4 text-muted-foreground" />
+                                                        <span>Unassigned</span>
                                                     </div>
                                                 </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-
-                                <div className="space-y-3">
-                                    <Label htmlFor="priority" className="text-sm font-medium">
-                                        Priority
-                                    </Label>
-                                    <Select
-                                        value={priority}
-                                        onValueChange={value => setPriority(value as TaskPriority)}
-                                    >
-                                        <SelectTrigger id="priority" className="w-full">
-                                            <SelectValue placeholder="Select priority" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="HIGH" className="text-red-600 dark:text-red-400">
-                                                <div className="flex items-center gap-2">
-                                                    <div className="w-2 h-2 rounded-full bg-red-600 dark:bg-red-400"></div>
-                                                    High
-                                                </div>
-                                            </SelectItem>
-                                            <SelectItem value="MEDIUM" className="text-yellow-600 dark:text-yellow-400">
-                                                <div className="flex items-center gap-2">
-                                                    <div className="w-2 h-2 rounded-full bg-yellow-600 dark:bg-yellow-400"></div>
-                                                    Medium
-                                                </div>
-                                            </SelectItem>
-                                            <SelectItem value="LOW" className="text-green-600 dark:text-green-400">
-                                                <div className="flex items-center gap-2">
-                                                    <div className="w-2 h-2 rounded-full bg-green-600 dark:bg-green-400"></div>
-                                                    Low
-                                                </div>
-                                            </SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            </>
-                        ) : (
-                            <>
-                                <div className="space-y-3">
-                                    <div className="flex items-center">
-                                        <h3 className="text-sm font-medium">Description</h3>
-                                        {!description && (
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                className="ml-2 h-7 text-xs text-muted-foreground hover:text-foreground"
-                                                onClick={() => setIsEditing(true)}
-                                            >
-                                                Add
-                                            </Button>
-                                        )}
+                                                {members.map(member => (
+                                                    <SelectItem key={member.user?.id} value={member.user?.id || ""}>
+                                                        <div className="flex items-center gap-2">
+                                                            <Avatar className="h-5 w-5">
+                                                                <AvatarImage
+                                                                    src={
+                                                                        member.user?.username
+                                                                            ? `https://avatar.vercel.sh/${member.user.username}`
+                                                                            : undefined
+                                                                    }
+                                                                    alt={member.user?.username || "Member"}
+                                                                />
+                                                                <AvatarFallback className="text-xs">
+                                                                    {getInitials(member.user?.username)}
+                                                                </AvatarFallback>
+                                                            </Avatar>
+                                                            <span>{member.user?.username}</span>
+                                                            <span className="text-xs text-muted-foreground ml-1">
+                                                                ({member.role})
+                                                            </span>
+                                                        </div>
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
                                     </div>
-                                    {description ? (
-                                        <div className="text-sm text-muted-foreground whitespace-pre-line p-4 bg-muted/40 rounded-md border">
-                                            {description}
-                                        </div>
-                                    ) : (
-                                        <p className="text-sm text-muted-foreground italic">No description provided</p>
-                                    )}
-                                </div>
 
-                                <div className="p-4 border rounded-md space-y-4 bg-card/50">
-                                    <div className="space-y-2">
-                                        <h3 className="text-sm font-medium flex items-center gap-2">
-                                            <UserCircle2 className="h-4 w-4 text-primary" />
-                                            Assigned To
-                                        </h3>
-                                        {assignedMember ? (
-                                            <div className="flex items-center gap-3 mt-2 p-2 bg-background rounded-md border">
-                                                <Avatar className="h-8 w-8">
-                                                    <AvatarImage
-                                                        src={
-                                                            assignedMember.user?.username
-                                                                ? `https://avatar.vercel.sh/${assignedMember.user.username}`
-                                                                : undefined
-                                                        }
-                                                        alt={assignedMember.user?.username || "Member"}
-                                                    />
-                                                    <AvatarFallback className="text-xs">
-                                                        {getInitials(assignedMember.user?.username)}
-                                                    </AvatarFallback>
-                                                </Avatar>
-                                                <div>
-                                                    <p className="text-sm font-medium">
-                                                        {assignedMember.user?.username}
-                                                    </p>
-                                                    <p className="text-xs text-muted-foreground">
-                                                        {assignedMember.role}
-                                                    </p>
-                                                </div>
+                                    <div className="space-y-3">
+                                        <Label htmlFor="priority" className="text-sm font-medium">
+                                            Priority
+                                        </Label>
+                                        <Select
+                                            value={priority}
+                                            onValueChange={value => setPriority(value as TaskPriority)}
+                                        >
+                                            <SelectTrigger id="priority" className="w-full">
+                                                <SelectValue placeholder="Select priority" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="HIGH" className="text-red-600 dark:text-red-400">
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="w-2 h-2 rounded-full bg-red-600 dark:bg-red-400"></div>
+                                                        High
+                                                    </div>
+                                                </SelectItem>
+                                                <SelectItem
+                                                    value="MEDIUM"
+                                                    className="text-yellow-600 dark:text-yellow-400"
+                                                >
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="w-2 h-2 rounded-full bg-yellow-600 dark:bg-yellow-400"></div>
+                                                        Medium
+                                                    </div>
+                                                </SelectItem>
+                                                <SelectItem value="LOW" className="text-green-600 dark:text-green-400">
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="w-2 h-2 rounded-full bg-green-600 dark:bg-green-400"></div>
+                                                        Low
+                                                    </div>
+                                                </SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <div className="space-y-3">
+                                        <div className="flex items-center">
+                                            <h3 className="text-sm font-medium">Description</h3>
+                                            {!description && (
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="ml-2 h-7 text-xs text-muted-foreground hover:text-foreground"
+                                                    onClick={() => setIsEditing(true)}
+                                                >
+                                                    Add
+                                                </Button>
+                                            )}
+                                        </div>
+                                        {description ? (
+                                            <div className="text-sm text-muted-foreground whitespace-pre-line p-4 bg-muted/40 rounded-md border">
+                                                {description}
                                             </div>
                                         ) : (
-                                            <div className="flex items-center text-sm text-muted-foreground mt-1 p-2 bg-background rounded-md border">
-                                                <UserCircle2 className="mr-2 h-4 w-4" />
-                                                <span>Unassigned</span>
-                                            </div>
+                                            <p className="text-sm text-muted-foreground italic">
+                                                No description provided
+                                            </p>
                                         )}
                                     </div>
 
-                                    <div className="grid grid-cols-2 gap-4 pt-3 border-t">
-                                        <div>
-                                            <h3 className="text-xs font-medium uppercase text-muted-foreground mb-1">
-                                                Created
+                                    <div className="p-4 border rounded-md space-y-4 bg-card/50">
+                                        <div className="space-y-2">
+                                            <h3 className="text-sm font-medium flex items-center gap-2">
+                                                <UserCircle2 className="h-4 w-4 text-primary" />
+                                                Assigned To
                                             </h3>
-                                            <div className="flex items-center text-sm">
-                                                <Calendar className="mr-2 h-4 w-4 text-primary" />
-                                                {new Date(task.createdAt).toLocaleDateString(undefined, {
-                                                    year: "numeric",
-                                                    month: "short",
-                                                    day: "numeric",
-                                                })}
-                                            </div>
+                                            {assignedMember ? (
+                                                <div className="flex items-center gap-3 mt-2 p-2 bg-background rounded-md border">
+                                                    <Avatar className="h-8 w-8">
+                                                        <AvatarImage
+                                                            src={
+                                                                assignedMember.user?.username
+                                                                    ? `https://avatar.vercel.sh/${assignedMember.user.username}`
+                                                                    : undefined
+                                                            }
+                                                            alt={assignedMember.user?.username || "Member"}
+                                                        />
+                                                        <AvatarFallback className="text-xs">
+                                                            {getInitials(assignedMember.user?.username)}
+                                                        </AvatarFallback>
+                                                    </Avatar>
+                                                    <div>
+                                                        <p className="text-sm font-medium">
+                                                            {assignedMember.user?.username}
+                                                        </p>
+                                                        <p className="text-xs text-muted-foreground">
+                                                            {assignedMember.role}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="flex items-center text-sm text-muted-foreground mt-1 p-2 bg-background rounded-md border">
+                                                    <UserCircle2 className="mr-2 h-4 w-4" />
+                                                    <span>Unassigned</span>
+                                                </div>
+                                            )}
                                         </div>
 
-                                        {task.updatedAt && (
+                                        <div className="grid grid-cols-2 gap-4 pt-3 border-t">
                                             <div>
                                                 <h3 className="text-xs font-medium uppercase text-muted-foreground mb-1">
-                                                    Last Updated
+                                                    Created
                                                 </h3>
                                                 <div className="flex items-center text-sm">
-                                                    <Clock className="mr-2 h-4 w-4 text-primary" />
-                                                    {new Date(task.updatedAt).toLocaleDateString(undefined, {
+                                                    <Calendar className="mr-2 h-4 w-4 text-primary" />
+                                                    {new Date(task.createdAt).toLocaleDateString(undefined, {
                                                         year: "numeric",
                                                         month: "short",
                                                         day: "numeric",
                                                     })}
                                                 </div>
                                             </div>
-                                        )}
+
+                                            {task.updatedAt && (
+                                                <div>
+                                                    <h3 className="text-xs font-medium uppercase text-muted-foreground mb-1">
+                                                        Last Updated
+                                                    </h3>
+                                                    <div className="flex items-center text-sm">
+                                                        <Clock className="mr-2 h-4 w-4 text-primary" />
+                                                        {new Date(task.updatedAt).toLocaleDateString(undefined, {
+                                                            year: "numeric",
+                                                            month: "short",
+                                                            day: "numeric",
+                                                        })}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
+                                </>
+                            )}
+                        </TabsContent>
+
+                        <TabsContent value="activity" className="space-y-4 mt-6">
+                            <div className="rounded-md border p-6 bg-muted/30 flex flex-col items-center justify-center text-center space-y-2">
+                                <MessageSquare className="h-10 w-10 text-muted-foreground/60" />
+                                <h3 className="font-medium text-sm">Activity Log</h3>
+                                <p className="text-sm text-muted-foreground">
+                                    Updates and comments for this task will appear here
+                                </p>
+                            </div>
+                        </TabsContent>
+                    </Tabs>
+
+                    <DialogFooter className="gap-2 flex-wrap sm:flex-nowrap mt-6 pt-4 border-t">
+                        {isEditing ? (
+                            <>
+                                <Button
+                                    variant="outline"
+                                    onClick={() => {
+                                        setIsEditing(false);
+                                        setTitle(task.title);
+                                        setDescription(task.description || "");
+                                        setPriority(task.priority);
+                                        setAssignedMemberId(task.assignedTo ?? undefined);
+                                    }}
+                                    className="w-full sm:w-auto"
+                                    aria-label="Cancel editing"
+                                >
+                                    Cancel
+                                </Button>
+                                <Button
+                                    onClick={handleUpdateTask}
+                                    disabled={updateTask.isPending || !title.trim()}
+                                    className="w-full sm:w-auto"
+                                    aria-label="Save changes"
+                                >
+                                    {updateTask.isPending ? (
+                                        <span className="flex items-center gap-1">
+                                            <span className="size-4 border-2 border-foreground/10 border-t-foreground/80 rounded-full animate-spin"></span>
+                                            Saving...
+                                        </span>
+                                    ) : (
+                                        <span className="flex items-center gap-1">
+                                            <Check className="h-4 w-4" />
+                                            Save Changes
+                                        </span>
+                                    )}
+                                </Button>
+                            </>
+                        ) : (
+                            <>
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setIsEditing(true)}
+                                    className="w-full sm:w-auto"
+                                    aria-label="Edit task"
+                                >
+                                    Edit
+                                </Button>
+                                <Button
+                                    variant="destructive"
+                                    onClick={handleDeleteTask}
+                                    disabled={deleteTask.isPending}
+                                    className="w-full sm:w-auto"
+                                    aria-label="Delete task"
+                                >
+                                    {deleteTask.isPending ? (
+                                        <span className="flex items-center gap-1">
+                                            <span className="size-4 border-2 border-destructive-foreground/10 border-t-destructive-foreground/80 rounded-full animate-spin"></span>
+                                            Deleting...
+                                        </span>
+                                    ) : (
+                                        "Delete Task"
+                                    )}
+                                </Button>
                             </>
                         )}
-                    </TabsContent>
-
-                    <TabsContent value="activity" className="space-y-4 mt-6">
-                        <div className="rounded-md border p-6 bg-muted/30 flex flex-col items-center justify-center text-center space-y-2">
-                            <MessageSquare className="h-10 w-10 text-muted-foreground/60" />
-                            <h3 className="font-medium text-sm">Activity Log</h3>
-                            <p className="text-sm text-muted-foreground">
-                                Updates and comments for this task will appear here
-                            </p>
-                        </div>
-                    </TabsContent>
-                </Tabs>
-
-                <DialogFooter className="gap-2 flex-wrap sm:flex-nowrap mt-6 pt-4 border-t">
-                    {isEditing ? (
-                        <>
-                            <Button
-                                variant="outline"
-                                onClick={() => {
-                                    setIsEditing(false);
-                                    setTitle(task.title);
-                                    setDescription(task.description || "");
-                                    setPriority(task.priority);
-                                    setAssignedMemberId(task.assignedTo ?? undefined);
-                                }}
-                                className="w-full sm:w-auto"
-                                aria-label="Cancel editing"
-                            >
-                                Cancel
-                            </Button>
-                            <Button
-                                onClick={handleUpdateTask}
-                                disabled={updateTask.isPending || !title.trim()}
-                                className="w-full sm:w-auto"
-                                aria-label="Save changes"
-                            >
-                                {updateTask.isPending ? (
-                                    <span className="flex items-center gap-1">
-                                        <span className="size-4 border-2 border-foreground/10 border-t-foreground/80 rounded-full animate-spin"></span>
-                                        Saving...
-                                    </span>
-                                ) : (
-                                    <span className="flex items-center gap-1">
-                                        <Check className="h-4 w-4" />
-                                        Save Changes
-                                    </span>
-                                )}
-                            </Button>
-                        </>
-                    ) : (
-                        <>
-                            <Button
-                                variant="outline"
-                                onClick={() => setIsEditing(true)}
-                                className="w-full sm:w-auto"
-                                aria-label="Edit task"
-                            >
-                                Edit
-                            </Button>
-                            <Button
-                                variant="destructive"
-                                onClick={handleDeleteTask}
-                                disabled={deleteTask.isPending}
-                                className="w-full sm:w-auto"
-                                aria-label="Delete task"
-                            >
-                                {deleteTask.isPending ? (
-                                    <span className="flex items-center gap-1">
-                                        <span className="size-4 border-2 border-destructive-foreground/10 border-t-destructive-foreground/80 rounded-full animate-spin"></span>
-                                        Deleting...
-                                    </span>
-                                ) : (
-                                    "Delete Task"
-                                )}
-                            </Button>
-                        </>
-                    )}
-                </DialogFooter>
-            </DialogContent>
+                    </DialogFooter>
+                </DialogContent>
+            </FocusTrap>
         </Dialog>
     );
 };

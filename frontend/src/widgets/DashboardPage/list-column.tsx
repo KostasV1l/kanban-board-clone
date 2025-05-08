@@ -46,7 +46,7 @@ export const ListColumn = ({ list }: ListColumnProps) => {
     const [selectedTask, setSelectedTask] = useState<ITask | null>(null);
     const [isTaskDetailOpen, setIsTaskDetailOpen] = useState(false);
 
-    // Use our new useListRealtime hook to handle real-time task events
+    // Use hook to handle real-time task events
     useListRealtime(list.id, list.boardId, refetch);
 
     const handleTaskClick = (task: ITask) => {
@@ -70,11 +70,15 @@ export const ListColumn = ({ list }: ListColumnProps) => {
     };
 
     return (
-        <div style={style} ref={setNodeRef} className="flex h-full min-w-[250px] flex-col rounded-lg border bg-card">
+        <div
+            style={style}
+            ref={setNodeRef}
+            className="flex h-full min-w-[250px] flex-col rounded-lg border bg-card"
+            role="region"
+            aria-label={`${list.name} list containing ${tasks.length} tasks`}
+        >
             <div className="flex items-center justify-between border-b p-3 gap-2">
-                <div
-                    className="flex-1"
-                >
+                <div className="flex-1">
                     {isEditing ? (
                         <Input
                             value={name}
@@ -104,8 +108,9 @@ export const ListColumn = ({ list }: ListColumnProps) => {
                     {...listeners}
                     {...attributes}
                     title="Drag to reorder"
+                    aria-label="Drag to reorder list"
                 >
-                    <GripVertical className="h-4 w-4" />
+                    <GripVertical className="h-4 w-4" aria-hidden="true" />
                 </Button>
                 <span className="rounded-full bg-primary/10 px-2 py-1 text-xs font-medium">{list.tasksCount}</span>
                 <AlertDialog>
@@ -115,8 +120,9 @@ export const ListColumn = ({ list }: ListColumnProps) => {
                             size="icon"
                             className="h-6 w-6 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                             disabled={isDeleting}
+                            aria-label="Delete list"
                         >
-                            <Trash className="h-4 w-4" />
+                            <Trash className="h-4 w-4" aria-hidden="true" />
                         </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
@@ -157,8 +163,9 @@ export const ListColumn = ({ list }: ListColumnProps) => {
                         className="w-full justify-start"
                         size="sm"
                         onClick={() => setIsAddingTask(true)}
+                        aria-label="Add new task to this list"
                     >
-                        <Plus className="mr-2 h-4 w-4" />
+                        <Plus className="mr-2 h-4 w-4" aria-hidden="true" />
                         Add Task
                     </Button>
                 )}

@@ -38,26 +38,28 @@ export const DashboardPage = () => {
         <>
             <Greeting username={username!} boardCount={boardCount} />
             <BoardHeader />
-            {isLoading ? (
-                // Show skeleton UI while loading
-                <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 my-4">
-                    {[1, 2, 3, 4].map(i => (
-                        <Skeleton key={i} className="h-[200px] w-full rounded-xl" />
-                    ))}
-                </div>
-            ) : error ? (
-                // Show error message
-                <div className="rounded-md bg-red-50 p-4 my-4">
-                    <div className="flex">
-                        <div className="text-sm text-red-700">
-                            <p>Error loading boards. Please try again later.</p>
+            <main id="main-content">
+                {isLoading ? (
+                    // Show skeleton UI while loading
+                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 my-4">
+                        {[1, 2, 3, 4].map(i => (
+                            <Skeleton key={i} className="h-[200px] w-full rounded-xl" />
+                        ))}
+                    </div>
+                ) : error ? (
+                    // Show error message
+                    <div className="rounded-md bg-red-50 p-4 my-4">
+                        <div className="flex">
+                            <div className="text-sm text-red-700">
+                                <p>Error loading boards. Please try again later.</p>
+                            </div>
                         </div>
                     </div>
-                </div>
-            ) : (
-                // Show board list
-                <BoardList boardsList={boards || []} />
-            )}
+                ) : (
+                    // Show board list
+                    <BoardList boardsList={boards || []} />
+                )}
+            </main>
         </>
     );
 };
