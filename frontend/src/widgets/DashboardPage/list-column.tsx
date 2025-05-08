@@ -90,14 +90,14 @@ export const ListColumn = ({ list }: ListColumnProps) => {
                             onClick={e => e.stopPropagation()}
                         />
                     ) : (
-                        <h3
+                        <h2
                             className="font-medium text-sm cursor-pointer"
                             onClick={() => setIsEditing(true)}
                             title="Click to edit name"
                             onMouseDown={e => e.stopPropagation()}
                         >
                             {list.name}
-                        </h3>
+                        </h2>
                     )}
                 </div>
 
