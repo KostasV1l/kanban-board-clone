@@ -7,10 +7,11 @@ import { Label } from "@/components/ui/label";
 import { useRegister } from "@/features/auth/hooks";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { RegisterFormData, registerSchema } from "../model";
+import { useRouter } from "next/navigation";
 
 export function RegisterForm() {
     const { mutate: register, isPending } = useRegister();
-
+    const router = useRouter();
     const {
         register: registerField,
         handleSubmit,
@@ -20,7 +21,11 @@ export function RegisterForm() {
     });
 
     const onSubmit = (data: RegisterFormData) => {
-        register(data);
+        register(data, {
+            onSuccess: () => {
+                router.push("/dashboard");
+            }
+        });
     };
 
     return (

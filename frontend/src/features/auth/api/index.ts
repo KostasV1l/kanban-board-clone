@@ -69,7 +69,7 @@ export const AuthAPI = {
 
             return true;
         } catch (error) {
-            console.error("Token refresh failed:", error);
+            // console.error("Token refresh failed:", error);
             return false;
         }
     },
