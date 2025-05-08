@@ -105,13 +105,16 @@ export const BoardCard = ({ id, name, description, color, tasksCount = 0, userRo
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">{description}</p>
                 <p className="text-sm text-muted-foreground mt-1 mb-6">{tasksCount} tasks</p>
-                <Link className="w-full cursor-pointer" href="/board/[id]" as={`/board/${id}`}>
-                    <Button variant="outline" className="w-full text-xs font-semibold cursor-pointer">
-                        <ArrowRight className="inline size-4" />
-                        View Board
-                    </Button>
+                <Link
+                    href={`/board/${id}`}
+                    title={`View board "${name}"`}
+                    className="w-full inline-flex items-center justify-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-xs font-semibold transition-colors hover:bg-accent/80   "
+                >
+                    <ArrowRight className="size-4" />
+                    View Board
                 </Link>
             </div>
         </div>
     );
 };
+    

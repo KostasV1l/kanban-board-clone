@@ -35,7 +35,7 @@ export const CardOptionsButton = ({ taskId, listId, boardId, onOpenCard }: CardO
 
     return (
         <div
-            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none group-hover:pointer-events-auto"
             onClick={e => e.stopPropagation()}
         >
             <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
@@ -45,6 +45,7 @@ export const CardOptionsButton = ({ taskId, listId, boardId, onOpenCard }: CardO
                         size="icon"
                         aria-label="Task options"
                         className={cn("h-6 w-6 rounded-md hover:bg-accent/80", isOpen && "opacity-100 bg-accent/80")}
+                        aria-label={`More options`}
                     >
                         <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
                     </Button>

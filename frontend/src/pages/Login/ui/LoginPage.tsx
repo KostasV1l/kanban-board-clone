@@ -13,7 +13,7 @@ export const LoginPage = () => {
                 <div>
                     <Tabs defaultValue="login" className="w-full font-primary">
                         <TabsList className="grid w-full grid-cols-2 mb-6">
-                            <TabsTrigger className="cursor-pointer" value="login">
+                            <TabsTrigger className="cursor-pointer" value="login" autoFocus>
                                 Login
                             </TabsTrigger>
                             <TabsTrigger className="cursor-pointer" value="register">

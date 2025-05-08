@@ -14,11 +14,22 @@ const taskRoutes = require("./task.routes");
 
 const router = express.Router({mergeParams: true});
 
-// list of endpoints
+// List of endpoints
+// Here the lists refer to the columns of the board where the tasks are stored
+
+// Get all of the the lists in the board
 router.get("/", protect, checkBoardMembership(ROLES.VIEWER), getLists);
+
+// Get a specific list by ID
 router.get("/:listId", protect, checkBoardMembership(ROLES.VIEWER), getList);
+
+// Create a new list
 router.post("/", protect, checkBoardMembership(ROLES.EDITOR), createList);
+
+// Edit the list
 router.put("/:listId", protect, checkBoardMembership(ROLES.EDITOR), updateList);
+
+// Remove the list from the board
 router.delete("/:listId", protect, checkBoardMembership(ROLES.OWNER), deleteList);
 router.post("/reorder", protect, checkBoardMembership(ROLES.EDITOR), reorderLists);
 router.use("/:listId/tasks", taskRoutes);

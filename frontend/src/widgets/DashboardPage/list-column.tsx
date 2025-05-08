@@ -120,7 +120,7 @@ export const ListColumn = ({ list }: ListColumnProps) => {
                             size="icon"
                             className="h-6 w-6 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                             disabled={isDeleting}
-                            aria-label="Delete list"
+                            aria-label={`Delete list ${name}`}
                         >
                             <Trash className="h-4 w-4" aria-hidden="true" />
                         </Button>
@@ -135,8 +135,8 @@ export const ListColumn = ({ list }: ListColumnProps) => {
                         <AlertDialogFooter>
                             <AlertDialogCancel>Cancel</AlertDialogCancel>
                             <AlertDialogAction asChild>
-                                <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
-                                    {isDeleting ? "Deleting..." : "Delete"}
+                                <Button variant="destructive" onClick={handleDelete} disabled={isDeleting} aria-label={`Delete list ${name}`}>
+                                    {isDeleting ? "Deleting..." : "Delete"} 
                                 </Button>
                             </AlertDialogAction>
                         </AlertDialogFooter>
