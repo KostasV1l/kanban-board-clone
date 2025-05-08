@@ -1,5 +1,6 @@
 import axiosInstance from "@shared/api/axios-instance";
 import { IMember } from "../model";
+
 export const MemberAPI = {
     getMembers: async (boardId: string) => {
         const { data } = await axiosInstance.get<IMember[]>(`/boards/${boardId}/members`);
@@ -11,6 +12,10 @@ export const MemberAPI = {
     },
     deleteMember: async (boardId: string, memberId: string) => {
         const { data: response } = await axiosInstance.delete<IMember>(`/boards/${boardId}/members/${memberId}`);
+        return response;
+    },
+    updateMemberRole: async (boardId: string, memberId: string, role: string) => {
+        const { data: response } = await axiosInstance.put<IMember>(`/boards/${boardId}/members/${memberId}`, { role });
         return response;
     }
 }

@@ -21,6 +21,13 @@ export default function RootLayout({
             <html lang="en-GB" suppressHydrationWarning>
                 <head />
                 <body className="font-sans min-h-screen selection:bg-blue-950 selection:text-white dark:selection:bg-white dark:selection:text-blue-950  flex flex-col">
+                    {/* Skip to content link - visible only when focused */}
+                    <a 
+                        href="#main-content" 
+                        className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:p-2 focus:bg-primary focus:text-primary-foreground"
+                    >
+                        Skip to main content
+                    </a>
                     <Providers>
                         <div className="flex flex-col min-h-screen flex-grow">
                             {children}

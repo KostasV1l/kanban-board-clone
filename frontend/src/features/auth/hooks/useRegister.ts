@@ -12,7 +12,7 @@ export const useRegister = () => {
         mutationFn: (data: RegisterFormData) => AuthAPI.register(data),
         onSuccess: (data) => {
             toast.success("Registration successful");
-            queryClient.setQueryData(authKeys.currentUser(), data.user);
+            queryClient.setQueryData(authKeys.currentUser(), data.user)
             
         },
         onError: (error) => {

@@ -1,4 +1,4 @@
-import { Archive, Copy, Monitor, MoreHorizontal, Move, Palette, Tag, Users } from "lucide-react";
+import { Archive, Copy, Monitor, MoreHorizontal } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,18 +16,18 @@ interface CardOptionsButtonProps {
     taskId: string | number;
     listId: string;
     boardId: string;
+    onOpenCard?: () => void;
 }
 
-export const CardOptionsButton = ({ taskId, listId, boardId }: CardOptionsButtonProps) => {
+export const CardOptionsButton = ({ taskId, listId, boardId, onOpenCard }: CardOptionsButtonProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const deleteTask = useDeleteTask();
 
     const handleMenuItemClick = (action: string) => {
-        // Handle different menu item actions
-        console.log(`Action ${action} for task ${taskId} in list ${listId} in board ${boardId}`);
-
         if (action === "delete") {
             deleteTask.mutate({ boardId: boardId, listId: listId, taskId: taskId.toString() });
+        } else if (action === "open" && onOpenCard) {
+            onOpenCard();
         }
 
         setIsOpen(false);
@@ -43,51 +43,22 @@ export const CardOptionsButton = ({ taskId, listId, boardId }: CardOptionsButton
                     <Button
                         variant="ghost"
                         size="icon"
+                        aria-label="Task options"
                         className={cn("h-6 w-6 rounded-md hover:bg-accent/80", isOpen && "opacity-100 bg-accent/80")}
                         aria-label={`More options`}
                     >
-                        <MoreHorizontal className="h-4 w-4" />
+                        <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
                     </Button>
                 </DropdownMenuTrigger>
 
                 <DropdownMenuContent className="w-60" align="end">
-                    <DropdownMenuLabel>Card Options</DropdownMenuLabel>
+                    <DropdownMenuLabel>Options</DropdownMenuLabel>
                     <DropdownMenuSeparator />
 
                     <DropdownMenuItem onClick={() => handleMenuItemClick("open")}>
                         <Monitor className="mr-2 h-4 w-4" />
                         Open card
                     </DropdownMenuItem>
-
-                    <DropdownMenuItem onClick={() => handleMenuItemClick("edit_labels")}>
-                        <Tag className="mr-2 h-4 w-4" />
-                        Edit labels
-                    </DropdownMenuItem>
-
-                    <DropdownMenuItem onClick={() => handleMenuItemClick("change_members")}>
-                        <Users className="mr-2 h-4 w-4" />
-                        Change members
-                    </DropdownMenuItem>
-
-                    <DropdownMenuItem onClick={() => handleMenuItemClick("change_cover")}>
-                        <Palette className="mr-2 h-4 w-4" />
-                        Change color
-                    </DropdownMenuItem>
-
-                    <DropdownMenuSeparator />
-
-                    <DropdownMenuItem onClick={() => handleMenuItemClick("move")}>
-                        <Move className="mr-2 h-4 w-4" />
-                        Move
-                    </DropdownMenuItem>
-
-                    <DropdownMenuItem onClick={() => handleMenuItemClick("copy")}>
-                        <Copy className="mr-2 h-4 w-4" />
-                        Copy card
-                    </DropdownMenuItem>
-
-                    <DropdownMenuSeparator />
-
                     <DropdownMenuItem variant="destructive" onClick={() => handleMenuItemClick("delete")}>
                         <Archive className="mr-2 h-4 w-4" />
                         Delete

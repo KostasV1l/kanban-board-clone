@@ -105,6 +105,15 @@ class ListService extends BaseService {
             throw new BadRequestError("Invalid list ID format");
         }
 
+        // Get the list first to access the board ID
+        const existingList = await List.findById(listId);
+        if (!existingList) {
+            throw new ListNotFoundError();
+        }
+
+        // Store the board ID before updating
+        const boardId = existingList.board.toString();
+
         const session = await mongoose.startSession();
 
         try {
@@ -119,11 +128,24 @@ class ListService extends BaseService {
                 throw new ListNotFoundError();
             }
 
+
+
+            // Format the list data for the socket event
+            const plainList = updatedList.toObject ? updatedList.toObject() : updatedList;
+            const { __v, _id, board, ...restOfList } = plainList;
+            const formattedList = {
+                ...restOfList,
+                id: _id,
+                boardId: boardId,
+            };
+
+            // Emit socket event for successful list update using the pre-fetched boardId
+            socketEvents.listUpdated(boardId, listId, formattedList);
+
             await session.commitTransaction();
 
-            // Emit socket event for successful list update
-            socketEvents.listUpdated(boardId, listId, updatedList);
-            return updatedList;
+
+            return formattedList;
         } catch (error) {
             await session.abortTransaction();
             throw error;

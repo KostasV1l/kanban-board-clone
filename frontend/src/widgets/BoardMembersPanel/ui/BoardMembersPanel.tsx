@@ -14,6 +14,7 @@ interface BoardMembersPanelProps {
 export const BoardMembersPanel = ({ boardId }: BoardMembersPanelProps) => {
     const { data: members = [], isLoading, error } = useGetMembers(boardId);
     const [isInviteDialogOpen, setIsInviteDialogOpen] = useState(false);
+    const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const { user } = useAuthStatus();
 
     const currentUserMembership = members.find(member => member.user?.id === user?.id);
@@ -33,7 +34,7 @@ export const BoardMembersPanel = ({ boardId }: BoardMembersPanelProps) => {
 
     return (
         <>
-            <Popover>
+            <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
                 <PopoverTrigger asChild>
                     <Button variant="ghost" size="sm" className="flex items-center gap-2">
                         <Users className="size-4" />
@@ -69,6 +70,7 @@ export const BoardMembersPanel = ({ boardId }: BoardMembersPanelProps) => {
                                         boardId={boardId}
                                         isCurrentUser={member.user?.id === user?.id}
                                         isOwner={isOwner}
+                                        onMemberSelect={() => setIsPopoverOpen(false)}
                                     />
                                 ))
                             )}

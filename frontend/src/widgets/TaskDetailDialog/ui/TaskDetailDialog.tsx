@@ -1,6 +1,5 @@
-import { AlertCircle, Calendar, Check, Clock, MessageSquare, UserCircle2 } from "lucide-react";
+import { Calendar, Check, Clock, MessageSquare, UserCircle2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -45,41 +44,31 @@ export const TaskDetailDialog = ({ task, isOpen, onClose }: TaskDetailDialogProp
     const updateTask = useUpdateTask();
     const deleteTask = useDeleteTask();
 
-    // Use our task realtime hook to handle real-time task updates
     useTaskRealtime(
         task?.id || "",
         () => {
-            // When task is updated, refetch list to get updated task
             refetchList();
         },
         () => {
-            // When comments change, refetch members (which would typically include comment data)
             refetchMembers();
         },
     );
 
-    // Reset form state when task changes
+    // Reset form state when task changes or dialog opens/closes
     useEffect(() => {
-        if (task) {
+        if (isOpen && task) {
             setTitle(task.title);
             setDescription(task.description || "");
             setPriority(task.priority);
             setAssignedMemberId(task.assignedTo ?? undefined);
         }
-    }, [task]);
-
-    // Reset edit mode when dialog closes
-    useEffect(() => {
         if (!isOpen) {
-            setIsEditing(false);
+            setIsEditing(false); // Ensure editing mode is reset when dialog closes
         }
-    }, [isOpen]);
+    }, [isOpen, task]);
 
     const handleUpdateTask = () => {
         if (!task || !title.trim()) return;
-
-        // Handle the unassigned case by explicitly setting to null
-        // In MongoDB, undefined fields in updates are ignored, but null will remove the assigned user
         const assignedToValue = assignedMemberId === "unassigned" ? null : assignedMemberId;
 
         updateTask.mutate(
@@ -155,9 +144,24 @@ export const TaskDetailDialog = ({ task, isOpen, onClose }: TaskDetailDialogProp
     const assignedMember = getAssignedMember();
 
     return (
-        <Dialog open={isOpen} onOpenChange={open => !open && onClose()}>
-            <DialogContent className="sm:max-w-[600px] max-h-[85vh] overflow-y-auto">
-                <DialogHeader className="pb-4 border-b">
+        <Dialog
+            open={isOpen}
+            onOpenChange={open => {
+                if (!open) onClose();
+            }}
+        >
+            <DialogContent
+                className="sm:max-w-[600px] max-h-[85vh] overflow-y-auto"
+                onKeyDown={e => {
+                    // Radix Dialog typically handles Escape key to close via onOpenChange
+                    // Custom Escape key handling for edit mode can be added here if needed
+                    if (e.key === "Escape" && isEditing) {
+                        // Example: setIsEditing(false); e.stopPropagation();
+                    }
+                }}
+                tabIndex={-1} // Make DialogContent programmatically focusable
+            >
+                <DialogHeader className="mt-5 pb-4 border-b">
                     <DialogTitle className="flex justify-between items-center">
                         {isEditing ? (
                             <Input
@@ -165,13 +169,12 @@ export const TaskDetailDialog = ({ task, isOpen, onClose }: TaskDetailDialogProp
                                 onChange={e => setTitle(e.target.value)}
                                 className="text-lg font-bold"
                                 placeholder="Task title"
-                                autoFocus
                                 aria-label="Task title"
                             />
                         ) : (
                             <span className="text-lg font-bold">{task.title}</span>
                         )}
-                        <Badge variant="secondary" className={cn("ml-2 py-1 px-2", getPriorityColor(priority))}>
+                        <Badge variant="secondary" className={cn("py-1 px-2", getPriorityColor(priority))}>
                             {priority}
                         </Badge>
                     </DialogTitle>
@@ -396,13 +399,6 @@ export const TaskDetailDialog = ({ task, isOpen, onClose }: TaskDetailDialogProp
                         </div>
                     </TabsContent>
                 </Tabs>
-
-                {updateTask.isError && (
-                    <Alert variant="destructive" className="my-4">
-                        <AlertCircle className="h-4 w-4" />
-                        <AlertDescription>Failed to update task. Please try again.</AlertDescription>
-                    </Alert>
-                )}
 
                 <DialogFooter className="gap-2 flex-wrap sm:flex-nowrap mt-6 pt-4 border-t">
                     {isEditing ? (
